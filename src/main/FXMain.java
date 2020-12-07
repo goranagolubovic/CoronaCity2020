@@ -8,9 +8,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class FXMain extends Application {
@@ -29,11 +31,13 @@ public class FXMain extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Scene scene = new Scene(root, 800, 800);
+        Scene scene = new Scene(root, 1240, 700);
         scene.getStylesheets().add("view/style.css");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
+        primaryStage.setTitle("Corona City");
         primaryStage.show();
     }
+
 
 }
