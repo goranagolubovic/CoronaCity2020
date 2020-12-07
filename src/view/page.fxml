@@ -95,12 +95,12 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/queue.png" />
+                              <Image url="@images/graph-bar.png" />
                            </image>
                         </ImageView>
                      </children>
                   </HBox>
-                  <Label alignment="TOP_CENTER" text="PREGLEDAJ STANJE AMBULANTI" textAlignment="CENTER" wrapText="true" />
+                  <Label alignment="TOP_CENTER" text="PREGLEDAJ STATISTICKE PODATKE" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
             <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="143.0">
@@ -109,12 +109,12 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/queue.png" />
+                              <Image url="@images/pause-button.png" />
                            </image>
                         </ImageView>
                      </children>
                   </HBox>
-                  <Label alignment="TOP_CENTER" text="PREGLEDAJ STANJE AMBULANTI" textAlignment="CENTER" wrapText="true" />
+                  <Label alignment="TOP_CENTER" text="ZAUSTAVI SIMULACIJU" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
             <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="62.0">
@@ -123,26 +123,17 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/ambulance%20.png" />
+                              <Image url="@images/reset.png" />
                            </image>
                         </ImageView>
                      </children>
                   </HBox>
-                  <Label alignment="TOP_CENTER" text="POSALJI AMBULANTNO VOZILO" textAlignment="CENTER" wrapText="true" />
+                  <Label alignment="TOP_CENTER" text="POKRENI SIMULACIJU PONOVO" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
             <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="62.0">
                <children>
-                  <HBox alignment="CENTER">
-                     <children>
-                        <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@images/ambulance%20.png" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <Label alignment="TOP_CENTER" text="POSALJI AMBULANTNO VOZILO" textAlignment="CENTER" wrapText="true" />
+                  <HBox alignment="CENTER" />
                </children>
             </VBox>
             <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="128.0">
@@ -151,12 +142,12 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/queue.png" />
+                              <Image url="@images/stop-button.png" />
                            </image>
                         </ImageView>
                      </children>
                   </HBox>
-                  <Label alignment="TOP_CENTER" text="PREGLEDAJ STANJE AMBULANTI" textAlignment="CENTER" wrapText="true" />
+                  <Label alignment="TOP_CENTER" text="ZAVRSI SIMULACIJU" textAlignment="CENTER" wrapText="true" />
                </children>
             </VBox>
          </children>
