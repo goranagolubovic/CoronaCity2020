@@ -10,4 +10,7 @@ public class House {
         this.id = id;
         numberOfInmate=0;
     }
+    public Long getHouseId(){
+        return id;
+    }
 }

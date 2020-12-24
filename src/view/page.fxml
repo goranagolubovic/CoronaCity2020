@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -67,7 +68,7 @@
                      <children>
                         <ImageView fitHeight="46.0" fitWidth="55.0" onMousePressed="#sendAmbulance" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@images/ambulance%20.png" />
+                              <Image url="@images/ambulance .png" />
                            </image>
                         </ImageView>
                      </children>
@@ -160,6 +161,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
+      <Button fx:id="button" mnemonicParsing="false" text="Button" GridPane.columnIndex="2" GridPane.rowIndex="13" />
        
    </children>
 </GridPane>
