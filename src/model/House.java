@@ -10,7 +10,20 @@ public class House {
         this.id = id;
         numberOfInmate=0;
     }
-    public Long getHouseId(){
+
+    public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNumberOfInmate() {
+        return numberOfInmate;
+    }
+
+    public void setNumberOfInmate(Integer numberOfInmate) {
+        this.numberOfInmate = numberOfInmate;
     }
 }

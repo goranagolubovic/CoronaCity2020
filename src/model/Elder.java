@@ -1,6 +1,8 @@
 package model;
 
 import java.util.Calendar;
+import java.util.Random;
+import java.util.Timer;
 
 public class Elder extends Resident {
     public Elder(Long id, String name, String surname, Integer yearOfBirth, Gender gender, Long houseID) throws NotElderException {

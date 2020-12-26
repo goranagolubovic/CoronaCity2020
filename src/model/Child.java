@@ -2,6 +2,8 @@ package model;
 
 import java.time.Year;
 import java.util.Calendar;
+import java.util.Random;
+import java.util.Timer;
 
 public class Child extends Resident {
     public Child(Long id, String name, String surname, Integer yearOfBirth, Gender gender, Long houseID) throws NotChildException {

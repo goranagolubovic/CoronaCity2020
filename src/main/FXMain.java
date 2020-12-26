@@ -21,12 +21,7 @@ import java.util.Scanner;
 
 public class FXMain extends Application {
     public static void main(String[] args) throws NotChildException, NotElderException, NotAdultException {
-        System.out.println("Unesite broj stanovnika:");
-        Scanner scanner = new Scanner(System.in);
-        int numberOfResidents = scanner.nextInt();
         launch(args);
-       // Resident.setResident(numberOfResidents, City.getMatrix().length);
-
     }
 
     @Override

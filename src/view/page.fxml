@@ -52,7 +52,7 @@
                <children>
                   <HBox alignment="CENTER">
                      <children>
-                        <ImageView fitHeight="34.0" fitWidth="53.0" onMouseClicked="#allowMovement" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="allowMovementImageView" fitHeight="34.0" fitWidth="53.0"  pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/play-button.png" />
                            </image>
@@ -66,7 +66,7 @@
                <children>
                   <HBox alignment="CENTER">
                      <children>
-                        <ImageView fitHeight="46.0" fitWidth="55.0" onMousePressed="#sendAmbulance" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="sendAmbulanceImageView" fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/ambulance .png" />
                            </image>

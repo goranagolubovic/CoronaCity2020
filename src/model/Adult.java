@@ -1,6 +1,8 @@
 package model;
 
 import java.util.Calendar;
+import java.util.Random;
+import java.util.Timer;
 
 public class Adult extends Resident {
 

@@ -72,7 +72,7 @@ public class DataAboutCoronaCity {
         arrayOfHouses[i]=house;
     }
     public Long getHouseIDFromArray(int i){
-        return arrayOfHouses[i].getHouseId();
+        return arrayOfHouses[i].getId();
     }
     public House [] getArrayOfHouses(){
         return arrayOfHouses;
