@@ -16,8 +16,8 @@
             <VBox alignment="TOP_CENTER" focusTraversable="true" layoutX="19.0" layoutY="42.0" spacing="7.0">
                <children>
                   <TextField id="1" fx:id="odrasli" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="ODRASLI" style="-fx-background-color: ffffff;" text="3" />
-                  <TextField id="2" fx:id="djeca" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="DJECA" text="2" />
-                  <TextField fx:id="stari" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="STARI" text="1" />
+                  <TextField id="2" fx:id="djeca" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="DJECA" text="7" />
+                  <TextField fx:id="stari" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="STARI" text="3" />
                   <TextField fx:id="kuce" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ KUĆA" text="10" />
                   <TextField fx:id="punktovi" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ KONTROLNIH PUNKTOVA" text="5" />
                   <TextField fx:id="ambulante" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ AMBULANTNIH VOZILA" text="1" />

@@ -19,7 +19,7 @@ public class City {
         return matrix;
     }
 
-    public Object getFieldOfMatrix(int i,int j){
+    public Object getFieldOfMatrix(int i, int j){
         return  matrix[i][j];
     }
     public void setFieldOfMatrix(Object o,int i,int j){

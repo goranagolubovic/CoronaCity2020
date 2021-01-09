@@ -31,6 +31,7 @@ public class PageController implements Initializable {
     private static String playButton;
     private static String house;
     public final Object locker = new Object();
+    private final Object mapLocker = new Object();
 
 
     public PageController(DataAboutCoronaCity dataAboutCoronaCity) {
@@ -61,13 +62,6 @@ public class PageController implements Initializable {
         }
         addControlStation(dataAboutCoronaCity.getKontrolniPunktovi());
         addRectangleToUnusedFieldsOfMatrix();
-        //kretanje objekata
-        Line line = new Line(2, 2, 2, 2);
-        PathTransition transition = new PathTransition();
-        transition.setNode(button);
-        transition.setPath(line);
-        transition.setCycleCount(PathTransition.INDEFINITE);
-        transition.play();
     }
 
     private void initImageViews() {
@@ -75,6 +69,7 @@ public class PageController implements Initializable {
         sendAmbulanceImageView.setOnMouseClicked(this::sendAmbulance);
     }
 
+    //dodaju se ambulante u matricu grada
     public void initMap() {
         double gridWidth = 500;
         double gridHeight = 500;
@@ -100,6 +95,7 @@ public class PageController implements Initializable {
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
+                    rectangle.setUserData(clinic);
                     try {
                         city.setFieldOfMatrix(rectangle, i, j);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -136,6 +132,13 @@ public class PageController implements Initializable {
                 rectangle.setFill(new ImagePattern(new Image("view/images/home.png")));
                 city.setFieldOfMatrix(rectangle, iPosition, jPosition);
                 map.add(rectangle, iPosition, jPosition);
+                house.setFirstCoordinateOfHouse(iPosition);
+                house.setSecondCoordinateOfHouse(jPosition);
+                rectangle.setOnMouseClicked(event -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setContentText("x=" + house.getFirstCoordinateOfHouse() + ", y=" + house.getSecondCoordinateOfHouse() + ", name" + rectangle.getUserData().getClass().getName());
+                    alert.show();
+                });
                 br++;
             }
         }
@@ -143,31 +146,46 @@ public class PageController implements Initializable {
         int numberOfHouseSafeForKids = 0;
         Random random = new Random();
         Long[] houseIDsSafeForKids = new Long[dataAboutCoronaCity.getOdrasli() + dataAboutCoronaCity.getStari()];
-        List<House> houses= CityDataStore.getInstance().getHouses();
+        List<House> houses = CityDataStore.getInstance().getHouses();
         for (int o = 0; o < dataAboutCoronaCity.getOdrasli(); o++) {
-            int randomHouseIndex=random.nextInt(houses.size());
-            Long houseId=houses.get(randomHouseIndex).getId();
+            int randomHouseIndex = random.nextInt(houses.size());
+            House randomHouse = houses.get(randomHouseIndex);
+            Long houseId = randomHouse.getId();
             houseIDsSafeForKids[numberOfHouseSafeForKids++] = houseId;
-            int year = Calendar.getInstance().get(Calendar.YEAR) - (18+new Random().nextInt(65-18));
+            int year = Calendar.getInstance().get(Calendar.YEAR) - (18 + new Random().nextInt(65 - 18));
             Gender gender = new Random().nextInt(100) < 50 ? Gender.Female : Gender.Male;
             Adult adult = new Adult(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseId);
+            adult.setCurrentPositionOfResident(randomHouse.getFirstCoordinateOfHouse(), randomHouse.getSecondCoordinateOfHouse());
             CityDataStore.getInstance().addResident(adult);
+
         }
         for (int s = 0; s < dataAboutCoronaCity.getStari(); s++) {
-            int randomHouseIndex=random.nextInt(houses.size());
-            Long houseId=houses.get(randomHouseIndex).getId();
+            int randomHouseIndex = random.nextInt(houses.size());
+            House randomHouse = houses.get(randomHouseIndex);
+            Long houseId = randomHouse.getId();
             houseIDsSafeForKids[numberOfHouseSafeForKids++] = houseId;
-            int year = Calendar.getInstance().get(Calendar.YEAR) - (65+new Random().nextInt(120-65));
+            int year = Calendar.getInstance().get(Calendar.YEAR) - (65 + new Random().nextInt(120 - 65));
             Gender gender = new Random().nextInt(100) < 50 ? Gender.Female : Gender.Male;
             Elder elder = new Elder(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseId);
             CityDataStore.getInstance().addResident(elder);
+            elder.getCurrentPositionOfResident().setFirstCoordinate(randomHouse.getFirstCoordinateOfHouse());
+            elder.getCurrentPositionOfResident().setSecondCoordinate(randomHouse.getSecondCoordinateOfHouse());
         }
         for (int d = 0; d < dataAboutCoronaCity.getDjeca(); d++) {
             int index = random.nextInt(houseIDsSafeForKids.length);
-            int year=Calendar.getInstance().get(Calendar.YEAR) - new Random().nextInt(18);
+            Long randomHouseId = houseIDsSafeForKids[index];
+            House randomHouse = null;
+            for (House h : houses) {
+                if (h.getId() == randomHouseId) {
+                    randomHouse = h;
+                }
+            }
+            int year = Calendar.getInstance().get(Calendar.YEAR) - new Random().nextInt(18);
             Gender gender = new Random().nextInt(100) < 50 ? Gender.Female : Gender.Male;
             Child child = new Child(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseIDsSafeForKids[index]);
             CityDataStore.getInstance().addResident(child);
+            child.getCurrentPositionOfResident().setFirstCoordinate(randomHouse.getFirstCoordinateOfHouse());
+            child.getCurrentPositionOfResident().setSecondCoordinate(randomHouse.getSecondCoordinateOfHouse());
         }
 
     }
@@ -190,6 +208,7 @@ public class PageController implements Initializable {
             if (city.getFieldOfMatrix(iPosition, jPosition) == null) {
                 br++;
                 rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
+                rectangle.setUserData(controlStation);
                 map.add(rectangle, iPosition, jPosition);
                 city.setFieldOfMatrix(rectangle, iPosition, jPosition);
             } else
@@ -210,6 +229,7 @@ public class PageController implements Initializable {
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     map.add(rectangle, i, j);
+                    city.setFieldOfMatrix(rectangle, i, j);
                 }
             }
         }
@@ -229,9 +249,83 @@ public class PageController implements Initializable {
 
     @FXML
     private void allowMovement(MouseEvent e) {
-        Thread thread = new Thread(() -> {
-            synchronized (locker) {
 
+        Thread t2 = new Thread(() -> {
+            HashMap<Long, CurrentPositionOfResident> newCoordinates = new HashMap<>();
+            while (true) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                for (int resIndex=0; resIndex<CityDataStore.getInstance().getResidents().size();) {
+                    Resident r = CityDataStore.getInstance().getResidents().get(resIndex);
+                    // Resident r=CityDataStore.getInstance().getResidents().get(0);
+                    Direction direction = chooseDirectionOfMovement();
+                    if (r instanceof Child) {
+                        int firstCoordinate = r.getCurrentPositionOfResident().getFirstCoordinate();
+                        int secondCoordinate = r.getCurrentPositionOfResident().getSecondCoordinate();
+                        Object field = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                        Rectangle rectangle = (Rectangle) field;
+                        Object fieldContent = rectangle.getUserData();
+
+                        Object nextFieldContent;
+                        Rectangle nextRectangle;
+                        Object nextField;
+
+                        Rectangle oldRectangle;
+                        //obrisi covjeka sa prethodne pozicije i umjesto njega nacrtaj pravougaonik
+                        if (!checkBounds(direction, firstCoordinate, secondCoordinate, city)) {
+                            System.out.println("Checking bounds: "+direction+", "+firstCoordinate+", "+secondCoordinate);
+                            continue;
+                        }
+                        switch (direction) {
+                            case Up -> secondCoordinate--;
+                            case Left -> firstCoordinate--;
+                            case Right -> firstCoordinate++;
+                            case Bottom -> secondCoordinate++;
+                        }
+                        nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                        nextRectangle = (Rectangle) nextField;
+                        nextFieldContent = nextRectangle.getUserData();
+                        if (nextFieldContent instanceof Clinic ||
+                                nextFieldContent instanceof ControlStation ||
+                                nextFieldContent instanceof House ||
+                                nextFieldContent instanceof Resident) {
+                            System.out.println("Next field is filled: "+direction+", "+firstCoordinate+", "+secondCoordinate);
+                            continue;
+                        } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
+
+                        //synchronized (mapLocker) {
+                            if(!(fieldContent instanceof House)) {
+                                var newCords = newCoordinates.get(r.getId());
+                                oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
+                                oldRectangle.setFill(Color.rgb(238, 229, 222));
+                                oldRectangle.setUserData(null);
+                            }
+                        System.out.println("Stare pozicije:"+r.getCurrentPositionOfResident().getFirstCoordinate()+","+
+                                r.getCurrentPositionOfResident().getSecondCoordinate());
+                            //pozicija stanovnika u toku kretanja
+                            newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
+                            r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                            r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                            Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                            newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
+                            newRectangle.setUserData(r);
+                        //}
+                        System.out.println("Nove pozicije:"+r.getCurrentPositionOfResident().getFirstCoordinate()+","+
+                                r.getCurrentPositionOfResident().getSecondCoordinate());
+
+                    }
+                    resIndex++;
+                }
+            }
+        });
+        t2.start();
+
+      /*  Thread thread = new Thread(() -> {
+            synchronized (locker) {
                 locker.notify();
             }
 
@@ -239,10 +333,79 @@ public class PageController implements Initializable {
             Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Kretanje stanovnika je počelo. 😊");
-                a.show();
+                a.showAndWait();
+                while(true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException interruptedException) {
+                        interruptedException.printStackTrace();
+                    }
+                    for (Resident r : CityDataStore.getInstance().getResidents()) {
+                        if (r instanceof Child) {
+                            int firstCoordinate = r.getCurrentPositionOfResident().getFirstCoordinate();
+                            int secondCoordinate = r.getCurrentPositionOfResident().getSecondCoordinate();
+                            Object field = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                            Rectangle rectangle = (Rectangle) field;
+                            Object fieldContent = rectangle.getUserData();
+                            if (fieldContent instanceof House) {
+                                House kuca = (House) fieldContent;
+                                firstCoordinate=firstCoordinate+1;
+                                r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                                r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                                Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                                newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
+                                newRectangle.setUserData(r);
+                            } else if (fieldContent instanceof Resident) {
+                                Rectangle oldRectangle=(Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                                oldRectangle.setFill(Color.rgb(238, 229, 222));
+                                firstCoordinate=firstCoordinate+1;
+                                r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                                r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                                Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                                newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
+                                newRectangle.setUserData(r);
+                            } else {
+                                continue;
+                            }
+
+                        }
+                    }
+                    }
             });
         });
-        thread.start();
+        thread.start();*/
+    }
+
+    private boolean checkBounds(Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
+        switch (direction) {
+            case Up -> {
+                return secondCoordinate > 0;
+            }
+            case Left -> {
+                return firstCoordinate > 0;
+            }
+            case Right -> {
+                return firstCoordinate < city.getMatrix().length - 1;
+            }
+            case Bottom -> {
+                return secondCoordinate < city.getMatrix().length - 1;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    public Direction chooseDirectionOfMovement() {
+        Random random = new Random();
+        int direction = random.nextInt(4);
+        return switch (direction) {
+            case 0 -> Direction.Up;
+            case 1 -> Direction.Bottom;
+            case 2 -> Direction.Right;
+            case 3 -> Direction.Left;
+            default -> null;
+        };
     }
 
     @FXML
@@ -262,6 +425,7 @@ public class PageController implements Initializable {
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
             });
+
         });
         thread.start();
     }

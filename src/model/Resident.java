@@ -22,6 +22,7 @@ public class Resident {
     private static final String[] arrayOfNames = {"S", "M", "K", "V", "T", "U", "I", "L", "D", "B"};
     private static final String[] arrayOfSurnames = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
     private final Timer t = new Timer();
+    private CurrentPositionOfResident currentPositionOfResident;
 
     public Resident(Long id, String name, String surname, Integer yearOfBirth, Gender gender, Long houseID) {
         this.id = id;
@@ -36,9 +37,9 @@ public class Resident {
             public void run() {
                 DecimalFormat df = new DecimalFormat("0.0");
                 bodyTemperature = Double.parseDouble(df.format(minTemperature + (temperature.nextDouble() * (maxTemperature - minTemperature))));
-                System.out.println(thisResident);
             }
         }, 0, 10_000);
+        currentPositionOfResident=new CurrentPositionOfResident(0,0);
     }
 
     public Resident() {
@@ -128,6 +129,13 @@ public class Resident {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public CurrentPositionOfResident getCurrentPositionOfResident(){
+        return currentPositionOfResident;
+    }
+    public void setCurrentPositionOfResident(int i,int j){
+        currentPositionOfResident.setFirstCoordinate(i);
+        currentPositionOfResident.setSecondCoordinate(j);
     }
 }
 

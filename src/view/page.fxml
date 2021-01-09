@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -52,7 +51,7 @@
                <children>
                   <HBox alignment="CENTER">
                      <children>
-                        <ImageView fx:id="allowMovementImageView" fitHeight="34.0" fitWidth="53.0"  pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="allowMovementImageView" fitHeight="34.0" fitWidth="53.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/play-button.png" />
                            </image>
@@ -161,7 +160,6 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <Button fx:id="button" mnemonicParsing="false" text="Button" GridPane.columnIndex="2" GridPane.rowIndex="13" />
        
    </children>
 </GridPane>
