@@ -1,6 +1,5 @@
 package controller;
 
-import javafx.animation.PathTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,18 +11,24 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import model.*;
 
-import javax.lang.model.util.ElementScanner6;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class PageController implements Initializable {
+
+     private class SimulationStopped{
+        private boolean isSimulationStopped=false;
+    }
 
     private final DataAboutCoronaCity dataAboutCoronaCity;
     City city;
@@ -32,6 +37,8 @@ public class PageController implements Initializable {
     private static String house;
     public final Object locker = new Object();
     private final Object mapLocker = new Object();
+    SimulationStopped simulationStopped=new SimulationStopped();
+
 
 
     public PageController(DataAboutCoronaCity dataAboutCoronaCity) {
@@ -50,6 +57,8 @@ public class PageController implements Initializable {
     private ImageView allowMovementImageView;
     @FXML
     private ImageView sendAmbulanceImageView;
+    @FXML
+    private ImageView stopSimulationImageView;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -249,37 +258,85 @@ public class PageController implements Initializable {
 
     @FXML
     private void allowMovement(MouseEvent e) {
-
         Thread t2 = new Thread(() -> {
             HashMap<Long, CurrentPositionOfResident> newCoordinates = new HashMap<>();
             while (true) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                for (int resIndex=0; resIndex<CityDataStore.getInstance().getResidents().size();) {
+                for (int resIndex = 0; resIndex < CityDataStore.getInstance().getResidents().size() && simulationStopped.isSimulationStopped==false; ) {
                     Resident r = CityDataStore.getInstance().getResidents().get(resIndex);
-                    // Resident r=CityDataStore.getInstance().getResidents().get(0);
                     Direction direction = chooseDirectionOfMovement();
-                    if (r instanceof Child) {
-                        int firstCoordinate = r.getCurrentPositionOfResident().getFirstCoordinate();
-                        int secondCoordinate = r.getCurrentPositionOfResident().getSecondCoordinate();
-                        Object field = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                        Rectangle rectangle = (Rectangle) field;
-                        Object fieldContent = rectangle.getUserData();
+                    //if (r instanceof Child) {
+                    int firstCoordinate = r.getCurrentPositionOfResident().getFirstCoordinate();
+                    int secondCoordinate = r.getCurrentPositionOfResident().getSecondCoordinate();
+                    Object field = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                    Rectangle rectangle = (Rectangle) field;
+                    Object fieldContent = rectangle.getUserData();
+                    Object nextFieldContent;
+                    Rectangle nextRectangle;
+                    Object nextField;
 
-                        Object nextFieldContent;
-                        Rectangle nextRectangle;
-                        Object nextField;
+                    Rectangle oldRectangle;
 
-                        Rectangle oldRectangle;
-                        //obrisi covjeka sa prethodne pozicije i umjesto njega nacrtaj pravougaonik
-                        if (!checkBounds(direction, firstCoordinate, secondCoordinate, city)) {
-                            System.out.println("Checking bounds: "+direction+", "+firstCoordinate+", "+secondCoordinate);
+                        if (r instanceof Child) {
+                            Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
+                            if (!checkBoundsForChild(direction, firstCoordinate, secondCoordinate, city)) {
+                                System.out.println("Checking bounds: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                                continue;
+                            }
+                            switch (direction) {
+                                case Up -> secondCoordinate--;
+                                case Left -> firstCoordinate--;
+                                case Right -> firstCoordinate++;
+                                case Bottom -> secondCoordinate++;
+                            }
+                            nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                            nextRectangle = (Rectangle) nextField;
+                            nextFieldContent = nextRectangle.getUserData();
+                            if (nextFieldContent instanceof Clinic ||
+                                    nextFieldContent instanceof ControlStation ||
+                                    nextFieldContent instanceof House ||
+                                    nextFieldContent instanceof Resident) {
+                                System.out.println("Next field is filled: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                                resIndex=0;
+                                continue;
+                            } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
+
+                            //synchronized (mapLocker) {
+                            if (!(fieldContent instanceof House)) {
+                                var newCords = newCoordinates.get(r.getId());
+                                oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
+                                oldRectangle.setFill(Color.rgb(238, 229, 222));
+                                oldRectangle.setUserData(null);
+                            }
+                            System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                    r.getCurrentPositionOfResident().getSecondCoordinate());
+                            //pozicija stanovnika u toku kretanja
+                                newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
+                                r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                                r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                                Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                                newRectangle.setFill(new ImagePattern(new Image("view/images/child.png")));
+                                newRectangle.setUserData(r);
+                                //}
+                                System.out.println("Nove pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                        r.getCurrentPositionOfResident().getSecondCoordinate());
+                                System.out.println(r.getName()+r.getId()+','+direction+
+                                        "("+r.getCurrentPositionOfResident().getFirstCoordinate()+","+r.getCurrentPositionOfResident().getSecondCoordinate()+")");
+                            }
+
+                      else if (r instanceof Elder) {
+                        Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
+                        if (!checkBoundsForElder(optionalHouse.get(), direction, firstCoordinate, secondCoordinate, city)) {
+                            System.out.println("Checking bounds: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                            resIndex=0;
                             continue;
                         }
+
                         switch (direction) {
                             case Up -> secondCoordinate--;
                             case Left -> firstCoordinate--;
@@ -293,90 +350,262 @@ public class PageController implements Initializable {
                                 nextFieldContent instanceof ControlStation ||
                                 nextFieldContent instanceof House ||
                                 nextFieldContent instanceof Resident) {
-                            System.out.println("Next field is filled: "+direction+", "+firstCoordinate+", "+secondCoordinate);
+                            System.out.println("Next field is filled: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                            resIndex=0;
                             continue;
                         } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
 
                         //synchronized (mapLocker) {
-                            if(!(fieldContent instanceof House)) {
+                        if (!(fieldContent instanceof House)) {
+                            var newCords = newCoordinates.get(r.getId());
+                            oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
+                            oldRectangle.setFill(Color.rgb(238, 229, 222));
+                            oldRectangle.setUserData(null);
+                        }
+                            if(!checkDistance(firstCoordinate,secondCoordinate,city,direction)) {
+                                System.out.println("Distanca bi bila narusena");
+                                resIndex=0;
+                                continue;
+                            }
+
+                            System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                r.getCurrentPositionOfResident().getSecondCoordinate());
+                        //pozicija stanovnika u toku kretanja
+                        newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
+                        r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                        r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                        Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                        newRectangle.setFill(new ImagePattern(new Image("view/images/elder.png")));
+                        newRectangle.setUserData(r);
+                        //}
+                        System.out.println("Nove pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                r.getCurrentPositionOfResident().getSecondCoordinate());
+                            System.out.println(r.getName()+r.getId()+','+direction+
+                                    "("+r.getCurrentPositionOfResident().getFirstCoordinate()+","+r.getCurrentPositionOfResident().getSecondCoordinate()+")");
+
+                    }
+                        else if (r instanceof Adult) {
+                            Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
+                            if (!checkBoundsForAdult(optionalHouse.get(), direction, firstCoordinate, secondCoordinate, city)) {
+                                System.out.println("Checking bounds: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                                resIndex=0;
+                                continue;
+                            }
+
+                            switch (direction) {
+                                case Up -> secondCoordinate--;
+                                case Left -> firstCoordinate--;
+                                case Right -> firstCoordinate++;
+                                case Bottom -> secondCoordinate++;
+                            }
+
+                            nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                            nextRectangle = (Rectangle) nextField;
+                            nextFieldContent = nextRectangle.getUserData();
+                            if (nextFieldContent instanceof Clinic ||
+                                    nextFieldContent instanceof ControlStation ||
+                                    nextFieldContent instanceof House ||
+                                    nextFieldContent instanceof Resident) {
+                                System.out.println("Next field is filled: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                                resIndex=0;
+                                continue;
+                            } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
+
+                            //synchronized (mapLocker) {
+                            if (!(fieldContent instanceof House)) {
                                 var newCords = newCoordinates.get(r.getId());
                                 oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
                                 oldRectangle.setFill(Color.rgb(238, 229, 222));
                                 oldRectangle.setUserData(null);
                             }
-                        System.out.println("Stare pozicije:"+r.getCurrentPositionOfResident().getFirstCoordinate()+","+
-                                r.getCurrentPositionOfResident().getSecondCoordinate());
+                            if(!checkDistance(firstCoordinate,secondCoordinate,city,direction)){
+                                System.out.println("Distanca bi bila narusena");
+                                resIndex=0;
+                                continue;
+                            }
+
+                            System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                    r.getCurrentPositionOfResident().getSecondCoordinate());
                             //pozicija stanovnika u toku kretanja
                             newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
                             r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
                             r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
                             Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                            newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
+                            newRectangle.setFill(new ImagePattern(new Image("view/images/adult.png")));
                             newRectangle.setUserData(r);
-                        //}
-                        System.out.println("Nove pozicije:"+r.getCurrentPositionOfResident().getFirstCoordinate()+","+
-                                r.getCurrentPositionOfResident().getSecondCoordinate());
-
-                    }
-                    resIndex++;
-                }
-            }
-        });
-        t2.start();
-
-      /*  Thread thread = new Thread(() -> {
-            synchronized (locker) {
-                locker.notify();
-            }
-
-
-            Platform.runLater(() -> {
-                Alert a = new Alert(Alert.AlertType.INFORMATION);
-                a.setContentText("Kretanje stanovnika je počelo. 😊");
-                a.showAndWait();
-                while(true) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException interruptedException) {
-                        interruptedException.printStackTrace();
-                    }
-                    for (Resident r : CityDataStore.getInstance().getResidents()) {
-                        if (r instanceof Child) {
-                            int firstCoordinate = r.getCurrentPositionOfResident().getFirstCoordinate();
-                            int secondCoordinate = r.getCurrentPositionOfResident().getSecondCoordinate();
-                            Object field = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                            Rectangle rectangle = (Rectangle) field;
-                            Object fieldContent = rectangle.getUserData();
-                            if (fieldContent instanceof House) {
-                                House kuca = (House) fieldContent;
-                                firstCoordinate=firstCoordinate+1;
-                                r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
-                                r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
-                                Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                                newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
-                                newRectangle.setUserData(r);
-                            } else if (fieldContent instanceof Resident) {
-                                Rectangle oldRectangle=(Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                                oldRectangle.setFill(Color.rgb(238, 229, 222));
-                                firstCoordinate=firstCoordinate+1;
-                                r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
-                                r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
-                                Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                                newRectangle.setFill(new ImagePattern(new Image("view/images/man.png")));
-                                newRectangle.setUserData(r);
-                            } else {
-                                continue;
-                            }
+                            //}
+                            System.out.println("Nove pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                    r.getCurrentPositionOfResident().getSecondCoordinate());
+                            System.out.println(r.getName()+r.getId()+','+direction+
+                                    "("+r.getCurrentPositionOfResident().getFirstCoordinate()+","+r.getCurrentPositionOfResident().getSecondCoordinate()+")");
 
                         }
+                        resIndex++;
+                    /*try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException interruptedException) {
+                        interruptedException.printStackTrace();
+                    }*/
+                    if(stopSimulationImageView.isPressed()){
+                        synchronized (simulationStopped) {
+                            simulationStopped.isSimulationStopped = true;
+                        }
+
                     }
-                    }
-            });
+
+                }
+
+                }
         });
-        thread.start();*/
+        t2.start();
+    }
+    private Object getObjectNextToChoosedField(int firstCoordinate,int secondCoordinate){
+        return ((Rectangle)city.getFieldOfMatrix(firstCoordinate,secondCoordinate)).getUserData();
     }
 
-    private boolean checkBounds(Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
+    private boolean checkDistance(int firstCoordinate, int secondCoordinate,City city,Direction direction) {
+        //ako na sve 4 strane od izabranog polja na prvoj i drugoj poziciji nema objekta ili je on dijete,dopustice postavljanje objekta
+         // if (direction == Direction.Up) {
+            if ((secondCoordinate - 1) < 0)
+                return true;
+            else {
+                if(getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 1) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 1) instanceof Elder)
+                    return false;
+            }
+            if ((secondCoordinate - 2) < 0)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 2) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 2) instanceof Elder)
+                    return false;
+            }
+       // } else if (direction == Direction.Bottom) {
+            if ((secondCoordinate + 1) > city.getMatrix().length-1)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 1) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate, secondCoordinate +1) instanceof Elder)
+                    return false;
+            }
+            if ((secondCoordinate + 2) > city.getMatrix().length-1)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 2) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate, secondCoordinate +2) instanceof Elder)
+                    return false;
+            }
+      // } else if (direction == Direction.Left) {
+            if ((firstCoordinate - 1) < 0)
+                return true;
+                else{
+
+                  if(getObjectNextToChoosedField(firstCoordinate - 1, secondCoordinate) instanceof Adult
+                          || getObjectNextToChoosedField(firstCoordinate - 1, secondCoordinate) instanceof Elder)
+                      return false;
+              }
+            if ((firstCoordinate - 2) < 0)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate - 2, secondCoordinate) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate - 2, secondCoordinate) instanceof Elder)
+                    return false;
+            }
+       // } else if (direction == Direction.Right) {
+            if ((firstCoordinate + 1) > city.getMatrix().length-1)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate + 1, secondCoordinate) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate + 1, secondCoordinate) instanceof Elder)
+                    return false;
+            }
+            if ((firstCoordinate + 2) > city.getMatrix().length-1)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate +2, secondCoordinate) instanceof Adult
+                        || getObjectNextToChoosedField(firstCoordinate +2, secondCoordinate) instanceof Elder)
+                    return false;
+            }
+            if(firstCoordinate-1<0 || secondCoordinate-1<0)
+                return true;
+            else{
+                if(getObjectNextToChoosedField(firstCoordinate-1,secondCoordinate-1) instanceof Adult ||
+                getObjectNextToChoosedField(firstCoordinate-1,secondCoordinate-1) instanceof Elder)
+                    return false;
+            }
+        if(firstCoordinate-2<0 || secondCoordinate-2<0)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate-2,secondCoordinate-2) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate-2,secondCoordinate-2) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate-1<0 || secondCoordinate+1>city.getMatrix().length-1)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate-1,secondCoordinate+1) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate-1,secondCoordinate+1) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate-2<0 || secondCoordinate+2>city.getMatrix().length-1)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate-2,secondCoordinate+2) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate-2,secondCoordinate+2) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate+1>city.getMatrix().length-1 || secondCoordinate-1<0)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate+1,secondCoordinate-1) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate+1,secondCoordinate-1) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate+2>city.getMatrix().length-1 || secondCoordinate-2<0)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate+2,secondCoordinate-2) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate+2,secondCoordinate-2) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate+1>city.getMatrix().length-1 || secondCoordinate+1>city.getMatrix().length-1)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate+1,secondCoordinate+1) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate+1,secondCoordinate+1) instanceof Elder)
+                return false;
+        }
+        if(firstCoordinate+2>city.getMatrix().length-1 || secondCoordinate+2>city.getMatrix().length-1)
+            return true;
+        else{
+            if(getObjectNextToChoosedField(firstCoordinate+2,secondCoordinate+2) instanceof Adult ||
+                    getObjectNextToChoosedField(firstCoordinate+2,secondCoordinate+2) instanceof Elder)
+                return false;
+        }
+
+      /* } else if (getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 1) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 1) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 2) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate + 2) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 1) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 1) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 2) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate, secondCoordinate - 2) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate + 1, secondCoordinate) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate + 1, secondCoordinate) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate + 2, secondCoordinate) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate + 2, secondCoordinate) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate - 1, secondCoordinate) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate - 1, secondCoordinate) instanceof Elder
+                || getObjectNextToChoosedField(firstCoordinate - 2, secondCoordinate) instanceof Adult
+                || getObjectNextToChoosedField(firstCoordinate - 2, secondCoordinate) instanceof Elder
+
+        )
+        {return false;}*/
+        return true;
+    }
+
+    private boolean checkBoundsForChild(Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
         switch (direction) {
             case Up -> {
                 return secondCoordinate > 0;
@@ -389,6 +618,46 @@ public class PageController implements Initializable {
             }
             case Bottom -> {
                 return secondCoordinate < city.getMatrix().length - 1;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+    private boolean checkBoundsForElder(House house,Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
+        System.out.println("House coordinates:"+house.getFirstCoordinateOfHouse()+","+house.getSecondCoordinateOfHouse());
+        switch (direction) {
+            case Up -> {
+                return (secondCoordinate > 0 && secondCoordinate>house.getSecondCoordinateOfHouse()-3);
+            }
+            case Left -> {
+                return (firstCoordinate > 0 && firstCoordinate>house.getFirstCoordinateOfHouse()-3);
+            }
+            case Right -> {
+                return (firstCoordinate < city.getMatrix().length - 1 && firstCoordinate<house.getFirstCoordinateOfHouse()+3);
+            }
+            case Bottom -> {
+                return (secondCoordinate < city.getMatrix().length - 1 && secondCoordinate<house.getSecondCoordinateOfHouse()+3);
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+    private boolean checkBoundsForAdult(House house,Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
+        System.out.println("House coordinates:"+house.getFirstCoordinateOfHouse()+","+house.getSecondCoordinateOfHouse());
+        switch (direction) {
+            case Up -> {
+                return (secondCoordinate > 0 && secondCoordinate>house.getSecondCoordinateOfHouse()-Math.round(0.25*city.getMatrix().length));
+            }
+            case Left -> {
+                return (firstCoordinate > 0 && firstCoordinate>house.getFirstCoordinateOfHouse()-Math.round(0.25*city.getMatrix().length));
+            }
+            case Right -> {
+                return (firstCoordinate < city.getMatrix().length - 1 && firstCoordinate<house.getFirstCoordinateOfHouse()+Math.round(0.25*city.getMatrix().length));
+            }
+            case Bottom -> {
+                return (secondCoordinate < city.getMatrix().length - 1 && secondCoordinate<house.getSecondCoordinateOfHouse()+Math.round(0.25*city.getMatrix().length));
             }
             default -> {
                 return false;
@@ -428,6 +697,13 @@ public class PageController implements Initializable {
 
         });
         thread.start();
+    }
+
+    @FXML void stopSimulation(MouseEvent e){
+        System.out.println("Simulacija zavrsena..");
+        stopSimulationImageView.getScene().getWindow().hide();
+
+
     }
 
 }

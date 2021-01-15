@@ -51,7 +51,7 @@ public class MainPageController implements Initializable {
                 Integer.parseInt(stari.getText())
         );
         PageController pageController = new PageController(dataAboutCoronaCity);
-        loader.setController(pageController);// Hajde :*
+        loader.setController(pageController);
         Parent root = (Parent) loader.load();
         //proslijedjuje podatke o broju kuca,odraslih,djece...u drugi kontoler...
        /*pageController.setBrojKuca(kuce.getText());

@@ -140,7 +140,7 @@
                <children>
                   <HBox alignment="TOP_CENTER">
                      <children>
-                        <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="stopSimulationImageView" fitHeight="46.0" fitWidth="55.0" onMouseClicked="#stopSimulation" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/stop-button.png" />
                            </image>
