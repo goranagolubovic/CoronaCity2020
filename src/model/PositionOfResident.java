@@ -1,9 +1,9 @@
 package model;
 
-public class CurrentPositionOfResident {
+public class PositionOfResident {
     private int firstCoordinate;
     private int secondCoordinate;
-    public  CurrentPositionOfResident(int i,int j){
+    public PositionOfResident(int i, int j){
         firstCoordinate=i;
         secondCoordinate=j;
     }
