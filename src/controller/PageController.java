@@ -207,6 +207,7 @@ public class PageController implements Initializable {
         double cellWidth = gridWidth / city.getMatrix().length;
         Random r = new Random();
         int br = 0;
+        //List<ControlStation>controlStations=CityDataStore.getInstance().getControlStations();
         while (br != controls) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
             rectangle.getStyleClass().add("rectangle-map");
@@ -216,10 +217,13 @@ public class PageController implements Initializable {
             int jPosition = r.nextInt(city.getMatrix().length - 1);
             if (city.getFieldOfMatrix(iPosition, jPosition) == null) {
                 br++;
+                controlStation.setFirstCoordinateOfControlStation(iPosition);
+                controlStation.setSecondCoordinateOfControlStation(jPosition);
                 rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
                 rectangle.setUserData(controlStation);
                 map.add(rectangle, iPosition, jPosition);
                 city.setFieldOfMatrix(rectangle, iPosition, jPosition);
+                CityDataStore.getInstance().addControlStation(controlStation);
             } else
                 continue;
 
@@ -260,9 +264,11 @@ public class PageController implements Initializable {
     private void allowMovement(MouseEvent e) {
         Thread t2 = new Thread(() -> {
             HashMap<Long, CurrentPositionOfResident> newCoordinates = new HashMap<>();
+            boolean wasControlStationOnPreviousRectangle=false;
+            Object o=null;
             while (true) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -280,9 +286,13 @@ public class PageController implements Initializable {
                     Rectangle nextRectangle;
                     Object nextField;
 
+
+
                     Rectangle oldRectangle;
 
-                        if (r instanceof Child) {
+                    List<ControlStation>controlStations=CityDataStore.getInstance().getControlStations();
+
+                        /*if (r instanceof Child) {
                             Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
                             if (!checkBoundsForChild(direction, firstCoordinate, secondCoordinate, city)) {
                                 System.out.println("Checking bounds: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
@@ -297,37 +307,139 @@ public class PageController implements Initializable {
                             nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
                             nextRectangle = (Rectangle) nextField;
                             nextFieldContent = nextRectangle.getUserData();
+
                             if (nextFieldContent instanceof Clinic ||
                                     nextFieldContent instanceof ControlStation ||
                                     nextFieldContent instanceof House ||
                                     nextFieldContent instanceof Resident) {
                                 System.out.println("Next field is filled: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
-                                resIndex=0;
+                                resIndex = 0;
                                 continue;
-                            } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
-
+                            }
+                            else if(nextFieldContent instanceof ControlStation){
+                                wasControlStationOnPreviousRectangle=false;
+                            }
+                                //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
                             //synchronized (mapLocker) {
                             if (!(fieldContent instanceof House)) {
                                 var newCords = newCoordinates.get(r.getId());
                                 oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
                                 oldRectangle.setFill(Color.rgb(238, 229, 222));
                                 oldRectangle.setUserData(null);
-                            }
-                            System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
-                                    r.getCurrentPositionOfResident().getSecondCoordinate());
-                            //pozicija stanovnika u toku kretanja
+                               for (int i = 0; i < CityDataStore.getInstance().getControlStations().size()-1 && !wasControlStationOnPreviousRectangle; i++) {
+                                    if (((Resident) oldRectangle.getUserData()).getCurrentPositionOfResident().getFirstCoordinate() == controlStations.get(i).getFirstCoordinateOfControlStation()
+                                            && ((Resident) oldRectangle.getUserData()).getCurrentPositionOfResident().getSecondCoordinate() == controlStations.get(i).getSecondCoordinateOfControlSttaion()) {
+                                        oldRectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
+                                        oldRectangle.setUserData(new ControlStation());
+                                        wasControlStationOnPreviousRectangle = true;
+                                    } else {
+                                        oldRectangle.setFill(Color.rgb(238, 229, 222));
+                                        oldRectangle.setUserData(null);
+                                    }
+
+                                }
+                                System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                        r.getCurrentPositionOfResident().getSecondCoordinate());
+                                //pozicija stanovnika u toku kretanja
                                 newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
                                 r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
                                 r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
                                 Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-                                newRectangle.setFill(new ImagePattern(new Image("view/images/child.png")));
+                               if (newRectangle.getUserData() instanceof ControlStation) {
+                                    newRectangle.setFill(new ImagePattern(new Image("view/images/thermometer+child.png")));
+                                } else {
+                                    newRectangle.setFill(new ImagePattern(new Image("view/images/child.png")));
+                               // }
                                 newRectangle.setUserData(r);
                                 //}
                                 System.out.println("Nove pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
                                         r.getCurrentPositionOfResident().getSecondCoordinate());
-                                System.out.println(r.getName()+r.getId()+','+direction+
-                                        "("+r.getCurrentPositionOfResident().getFirstCoordinate()+","+r.getCurrentPositionOfResident().getSecondCoordinate()+")");
+                                System.out.println(r.getName() + r.getId() + ',' + direction +
+                                        "(" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," + r.getCurrentPositionOfResident().getSecondCoordinate() + ")");
                             }
+                        }*/
+                      if(r instanceof Adult) {
+                          Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
+                          if (!checkBoundsForChild( direction, firstCoordinate, secondCoordinate, city)) {
+                              System.out.println("Checking bounds: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                              resIndex=0;
+                              continue;
+                          }
+
+                          switch (direction) {
+                              case Up -> secondCoordinate--;
+                              case Left -> firstCoordinate--;
+                              case Right -> firstCoordinate++;
+                              case Bottom -> secondCoordinate++;
+                          }
+                          nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                          nextRectangle = (Rectangle) nextField;
+                          nextFieldContent = nextRectangle.getUserData();
+                          if (nextFieldContent instanceof Clinic ||
+                                  //nextFieldContent instanceof ControlStation ||
+                                  nextFieldContent instanceof House ||
+                                  nextFieldContent instanceof Resident) {
+                              System.out.println("Next field is filled: " + direction + ", " + firstCoordinate + ", " + secondCoordinate);
+                              resIndex=0;
+                              continue;
+                          } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
+
+
+                          //synchronized (mapLocker) {
+                          if (!(fieldContent instanceof House)) {
+                              var newCords = newCoordinates.get(r.getId());
+                              oldRectangle = (Rectangle) city.getFieldOfMatrix(newCords.getFirstCoordinate(), newCords.getSecondCoordinate());
+                              if (o!=null) {
+                                  for (int i = 0; i < CityDataStore.getInstance().getControlStations().size() - 1 && wasControlStationOnPreviousRectangle; i++) {
+                                      if (((ControlStation) o).getFirstCoordinateOfControlStation() == controlStations.get(i).getFirstCoordinateOfControlStation()
+                                              && ((ControlStation) o).getSecondCoordinateOfControlStation() == controlStations.get(i).getSecondCoordinateOfControlStation()) {
+                                          oldRectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
+                                          oldRectangle.setUserData((ControlStation) o);
+                                          //wasControlStationOnPreviousRectangle=false;
+
+                                      }
+                                  }
+
+                              }
+                                  if (!wasControlStationOnPreviousRectangle) {
+                                      oldRectangle.setFill(Color.rgb(238, 229, 222));
+                                      oldRectangle.setUserData(null);
+                                      if (nextFieldContent instanceof ControlStation) {
+                                          wasControlStationOnPreviousRectangle = true;
+                                          o = nextFieldContent;
+                                      }
+
+                                  }
+                                  else {
+                                      o = null;
+                                      wasControlStationOnPreviousRectangle = false;
+                                  }
+
+                          }
+
+
+
+                          System.out.println("Stare pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                  r.getCurrentPositionOfResident().getSecondCoordinate());
+                          //pozicija stanovnika u toku kretanja
+                          newCoordinates.put(r.getId(), new CurrentPositionOfResident(firstCoordinate, secondCoordinate));
+                          r.getCurrentPositionOfResident().setFirstCoordinate(firstCoordinate);
+                          r.getCurrentPositionOfResident().setSecondCoordinate(secondCoordinate);
+                          Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+                          if (newRectangle.getUserData() instanceof ControlStation) {
+                              newRectangle.setFill(new ImagePattern(new Image("view/images/thermometer+child.png")));
+                          } else {
+                              newRectangle.setFill(new ImagePattern(new Image("view/images/child.png")));
+                               }
+                              newRectangle.setUserData(r);
+
+                          //}
+                          System.out.println("Nove pozicije:" + r.getCurrentPositionOfResident().getFirstCoordinate() + "," +
+                                  r.getCurrentPositionOfResident().getSecondCoordinate());
+                          System.out.println(r.getName()+r.getId()+','+direction+
+                                  "("+r.getCurrentPositionOfResident().getFirstCoordinate()+","+r.getCurrentPositionOfResident().getSecondCoordinate()+")");
+
+                      }
 
                       else if (r instanceof Elder) {
                         Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == r.getHouseID()).findFirst();
@@ -459,6 +571,7 @@ public class PageController implements Initializable {
         });
         t2.start();
     }
+
     private Object getObjectNextToChoosedField(int firstCoordinate,int secondCoordinate){
         return ((Rectangle)city.getFieldOfMatrix(firstCoordinate,secondCoordinate)).getUserData();
     }
@@ -701,7 +814,8 @@ public class PageController implements Initializable {
 
     @FXML void stopSimulation(MouseEvent e){
         System.out.println("Simulacija zavrsena..");
-        stopSimulationImageView.getScene().getWindow().hide();
+        System.exit(0);
+
 
 
     }

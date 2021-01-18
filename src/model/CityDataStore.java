@@ -12,10 +12,12 @@ public class CityDataStore {
 
     private List<Resident> residents;
     private List<House> houses;
+    private List<ControlStation>controlStations;
 
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
+        controlStations=new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
@@ -30,6 +32,9 @@ public class CityDataStore {
     public synchronized void addHouse(House house) {
         house.setId(createHouseID());
         houses.add(house);
+    }
+    public synchronized void addControlStation(ControlStation controlStation){
+        controlStations.add(controlStation);
     }
 
 
@@ -65,5 +70,12 @@ public class CityDataStore {
 
     public void setHouses(List<House> houses) {
         this.houses = houses;
+    }
+
+    public  List<ControlStation> getControlStations(){
+        return controlStations;
+    }
+    public void setControlStations(List<ControlStation>controlStations){
+        this.controlStations=controlStations;
     }
 }
