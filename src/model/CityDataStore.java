@@ -13,11 +13,13 @@ public class CityDataStore {
     private List<Resident> residents;
     private List<House> houses;
     private List<ControlStation>controlStations;
+    private List<Clinic>clinics;
 
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
         controlStations=new ArrayList<>();
+        clinics=new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
@@ -35,6 +37,9 @@ public class CityDataStore {
     }
     public synchronized void addControlStation(ControlStation controlStation){
         controlStations.add(controlStation);
+    }
+    public synchronized void addClinic(Clinic clinic){
+        clinics.add(clinic);
     }
 
 

@@ -22,8 +22,13 @@ import java.util.List;
 
 public class PageController implements Initializable {
 
+    private boolean isAmbulanceArrived=false;
+
     public class SimulationStopped {
         public boolean isSimulationStopped = false;
+    }
+    public static class AmbulanceArrived{
+        public boolean isAmbulanceArrived=false;
     }
 
     private final DataAboutCoronaCity dataAboutCoronaCity;
@@ -31,11 +36,14 @@ public class PageController implements Initializable {
     private static String clinic;
     private static String playButton;
     private static String house;
-    public final Object locker = new Object();
     private final Object mapLocker = new Object();
+    public static final Object lockerInfectedPerson = new Object();
+    public static final Object lockerThreadRunning=new Object();
     SimulationStopped simulationStopped = new SimulationStopped();
-
-
+    static AmbulanceArrived ambulanceArrived=new AmbulanceArrived();
+    public static List<Thread> listOfActiveThreads = new ArrayList<>();
+    public  static Thread residentThread;
+    public static  boolean isThreadRunning=true;
     public PageController(DataAboutCoronaCity dataAboutCoronaCity) {
         city = new City();
         this.dataAboutCoronaCity = dataAboutCoronaCity;
@@ -70,7 +78,7 @@ public class PageController implements Initializable {
 
     private void initImageViews() {
         allowMovementImageView.setOnMouseClicked(this::allowMovement);
-        sendAmbulanceImageView.setOnMouseClicked(this::sendAmbulance);
+        //sendAmbulanceImageView.setOnMouseClicked(this::sendAmbulance);
     }
 
     //dodaju se ambulante u matricu grada
@@ -100,6 +108,7 @@ public class PageController implements Initializable {
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                     rectangle.setUserData(clinic);
+                    CityDataStore.getInstance().addClinic(clinic);
                     try {
                         city.setFieldOfMatrix(rectangle, i, j);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -111,7 +120,6 @@ public class PageController implements Initializable {
             }
 
         }
-        System.out.println(dataAboutCoronaCity.getBrojKuca());
     }
 
     public void addHouses(int numberOfHouses) throws NotAdultException, NotElderException, NotChildException {
@@ -122,14 +130,27 @@ public class PageController implements Initializable {
         double cellWidth = gridWidth / city.getMatrix().length;
         Random r = new Random();
         int br = 0;
+
+        List<PositionOfResident> freePositions = new ArrayList<>();
+        for(int i=0; i<city.getMatrix().length; i++){
+            for(int j=0; j<city.getMatrix().length; j++){
+                if(city.getMatrix()[i][j]==null){
+                    freePositions.add(new PositionOfResident(i,j));
+                }
+            }
+        }
         while (br != numberOfHouses) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
             rectangle.getStyleClass().add("rectangle-map");
             rectangle.setFill(Color.rgb(238, 229, 222));
             //House house=new House((long)br);
-            int iPosition = r.nextInt(city.getMatrix().length - 1);
-            int jPosition = r.nextInt(city.getMatrix().length - 1);
-            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null) {
+
+            int freeIndex = r.nextInt(freePositions.size() - 1);
+            PositionOfResident freePosition = freePositions.get(freeIndex);
+            int iPosition = freePosition.getFirstCoordinate();
+            int jPosition = freePosition.getSecondCoordinate();
+            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition,jPosition, 0, House.class)) {
+                freePositions.remove(freeIndex);
                 House house = new House(null);
                 CityDataStore.getInstance().addHouse(house);
                 rectangle.setUserData(house);
@@ -254,61 +275,71 @@ public class PageController implements Initializable {
         playButton = properties.getProperty("playButton");
         house = properties.getProperty("house");
     }
-
-    public class ControlStationOnPreviousRectangle{
-       public boolean wasControlStationOnPreviousRectangle=false;
-    }
     @FXML
     private void allowMovement(MouseEvent e) {
         Thread t2 = new Thread(() -> {
-            HashMap<Long, PositionOfResident> newCoordinates = new HashMap<>();
-            ControlStationOnPreviousRectangle controlStationOnPreviousRectangle=new ControlStationOnPreviousRectangle();
-            HashMap<Long, PositionOfResident> previousControlStations = new HashMap<>();
 
             List<Resident> residents = CityDataStore.getInstance().getResidents();
 
-            List<Thread> listOfActiveThreads = new ArrayList<>();
             for (Resident resident : residents) {
-                resident.setControlStationOnPreviousRectangle(controlStationOnPreviousRectangle);
                 resident.setDataAboutCoronaCity(dataAboutCoronaCity);
                 resident.setCity(city);
                 resident.setSimulationStopped(simulationStopped);
                 resident.setStopSimulationImageView(stopSimulationImageView);
-
-                Thread residentThread = new Thread(resident);
+                resident.setSendAmbulanceImageView(sendAmbulanceImageView);
+                resident.setAmbulanceArrived(ambulanceArrived);
+                residentThread = new Thread(resident);
                 listOfActiveThreads.add(residentThread);
                 residentThread.start();
+
             }
             for (Thread thread:listOfActiveThreads) {
                 try {
                     thread.join();
-                } catch (InterruptedException interruptedException) {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Failure.");
-                    alert.show();
+                    }
+
+                  catch (InterruptedException interruptedException) {
+//                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Failure.");
+//                    alert.show();
+                    interruptedException.printStackTrace();
                 }
             }
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "END :D");
-            alert.showAndWait();
+//            Alert alert = new Alert(Alert.AlertType.INFORMATION, "END :D");
+//            alert.showAndWait();
         });
         t2.start();
+        /*Thread t3= new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+                while (!Resident.stackOfAlarms.empty()) {
+                    Alarm alarm = Resident.stackOfAlarms.pop();
+                    Platform.runLater(() -> {
+                        Alert a = new Alert(Alert.AlertType.INFORMATION);
+                        a.setContentText("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
+                        a.show();
+                   });
+
+                }
+            }
+        });
+        t3.start();*/
     }
-
-
-
-
-
 
     @FXML
     private void sendAmbulance(MouseEvent e) {
         Thread thread = new Thread(() -> {
-            try {
-                synchronized (locker) {
-
-                    locker.wait();
-                }
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
-            }
+//            try {
+//                synchronized (mapLocker) {
+//
+//                    mapLocker.wait();
+//                }
+//            } catch (InterruptedException interruptedException) {
+//                interruptedException.printStackTrace();
+//            }
 
             Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -316,6 +347,14 @@ public class PageController implements Initializable {
                 a.show();
             });
 
+            System.out.println("Poslano");
+            synchronized (lockerInfectedPerson) {
+                synchronized (lockerThreadRunning) {
+                        isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
+
+                }
+                lockerInfectedPerson.notifyAll();
+            }
         });
         thread.start();
     }
@@ -324,8 +363,9 @@ public class PageController implements Initializable {
     void stopSimulation(MouseEvent e) {
         System.out.println("Simulacija zavrsena..");
         System.exit(0);
-
+    }
+    @FXML
+    void reviewStateOfClinics(MouseEvent e){
 
     }
-
 }

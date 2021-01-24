@@ -10,7 +10,7 @@ public class DataAboutCoronaCity {
     private int djeca;
     private int stari;
 
-    private House arrayOfHouses [] =new House[100];
+    private House[] arrayOfHouses = new House[100];
 
     public DataAboutCoronaCity(int brojKuca, int kontrolniPunktovi, int ambulantnaVozila, int odrasli, int djeca, int stari) {
         this.brojKuca = brojKuca;
