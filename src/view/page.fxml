@@ -107,7 +107,7 @@
                <children>
                   <HBox alignment="TOP_CENTER">
                      <children>
-                        <ImageView fitHeight="46.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="46.0" fitWidth="55.0" onMouseClicked="#pauseSimulation" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/pause-button.png" />
                            </image>

@@ -14,21 +14,18 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import model.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
 
 public class PageController implements Initializable {
 
-    private boolean isAmbulanceArrived=false;
+
+    private Alarm alarm;
 
     public class SimulationStopped {
         public boolean isSimulationStopped = false;
-    }
-    public static class AmbulanceArrived{
-        public boolean isAmbulanceArrived=false;
     }
 
     private final DataAboutCoronaCity dataAboutCoronaCity;
@@ -38,12 +35,13 @@ public class PageController implements Initializable {
     private static String house;
     private final Object mapLocker = new Object();
     public static final Object lockerInfectedPerson = new Object();
-    public static final Object lockerThreadRunning=new Object();
+    public static final Object lockerThreadRunning = new Object();
     SimulationStopped simulationStopped = new SimulationStopped();
-    static AmbulanceArrived ambulanceArrived=new AmbulanceArrived();
     public static List<Thread> listOfActiveThreads = new ArrayList<>();
-    public  static Thread residentThread;
-    public static  boolean isThreadRunning=true;
+    public static Thread residentThread;
+    public static boolean isThreadRunning = true;
+    List<Alarm> alarms = new ArrayList<>();
+
     public PageController(DataAboutCoronaCity dataAboutCoronaCity) {
         city = new City();
         this.dataAboutCoronaCity = dataAboutCoronaCity;
@@ -132,10 +130,10 @@ public class PageController implements Initializable {
         int br = 0;
 
         List<PositionOfResident> freePositions = new ArrayList<>();
-        for(int i=0; i<city.getMatrix().length; i++){
-            for(int j=0; j<city.getMatrix().length; j++){
-                if(city.getMatrix()[i][j]==null){
-                    freePositions.add(new PositionOfResident(i,j));
+        for (int i = 0; i < city.getMatrix().length; i++) {
+            for (int j = 0; j < city.getMatrix().length; j++) {
+                if (city.getMatrix()[i][j] == null) {
+                    freePositions.add(new PositionOfResident(i, j));
                 }
             }
         }
@@ -149,7 +147,7 @@ public class PageController implements Initializable {
             PositionOfResident freePosition = freePositions.get(freeIndex);
             int iPosition = freePosition.getFirstCoordinate();
             int jPosition = freePosition.getSecondCoordinate();
-            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition,jPosition, 0, House.class)) {
+            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition, jPosition, 0, House.class)) {
                 freePositions.remove(freeIndex);
                 House house = new House(null);
                 CityDataStore.getInstance().addHouse(house);
@@ -275,30 +273,24 @@ public class PageController implements Initializable {
         playButton = properties.getProperty("playButton");
         house = properties.getProperty("house");
     }
+
     @FXML
     private void allowMovement(MouseEvent e) {
         Thread t2 = new Thread(() -> {
 
             List<Resident> residents = CityDataStore.getInstance().getResidents();
-
             for (Resident resident : residents) {
                 resident.setDataAboutCoronaCity(dataAboutCoronaCity);
-                resident.setCity(city);
                 resident.setSimulationStopped(simulationStopped);
-                resident.setStopSimulationImageView(stopSimulationImageView);
-                resident.setSendAmbulanceImageView(sendAmbulanceImageView);
-                resident.setAmbulanceArrived(ambulanceArrived);
+                resident.setCity(city);
                 residentThread = new Thread(resident);
                 listOfActiveThreads.add(residentThread);
                 residentThread.start();
-
             }
-            for (Thread thread:listOfActiveThreads) {
+            for (Thread thread : listOfActiveThreads) {
                 try {
                     thread.join();
-                    }
-
-                  catch (InterruptedException interruptedException) {
+                } catch (InterruptedException interruptedException) {
 //                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Failure.");
 //                    alert.show();
                     interruptedException.printStackTrace();
@@ -308,7 +300,7 @@ public class PageController implements Initializable {
 //            alert.showAndWait();
         });
         t2.start();
-        /*Thread t3= new Thread(() -> {
+        Thread t3 = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(1000);
@@ -316,17 +308,18 @@ public class PageController implements Initializable {
                     interruptedException.printStackTrace();
                 }
                 while (!Resident.stackOfAlarms.empty()) {
-                    Alarm alarm = Resident.stackOfAlarms.pop();
+                    alarm = Resident.stackOfAlarms.pop();
+                    alarms.add(alarm);
                     Platform.runLater(() -> {
                         Alert a = new Alert(Alert.AlertType.INFORMATION);
                         a.setContentText("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
                         a.show();
-                   });
+                    });
 
                 }
             }
         });
-        t3.start();*/
+        t3.start();
     }
 
     @FXML
@@ -350,10 +343,10 @@ public class PageController implements Initializable {
             System.out.println("Poslano");
             synchronized (lockerInfectedPerson) {
                 synchronized (lockerThreadRunning) {
-                        isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
+                    isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
 
                 }
-                lockerInfectedPerson.notifyAll();
+                lockerInfectedPerson.notify();
             }
         });
         thread.start();
@@ -364,8 +357,27 @@ public class PageController implements Initializable {
         System.out.println("Simulacija zavrsena..");
         System.exit(0);
     }
+
     @FXML
-    void reviewStateOfClinics(MouseEvent e){
+    void reviewStateOfClinics(MouseEvent e) {
 
     }
+    @FXML
+    void pauseSimulation(MouseEvent e) {
+        File file=new File("states");
+        file.mkdirs();
+        file=new File("states/"+System.currentTimeMillis()+".ser");
+        try (FileOutputStream fos=new FileOutputStream(file)) {
+            try(ObjectOutputStream oos=new ObjectOutputStream(fos)){
+                oos.writeObject(CityDataStore.getInstance());
+            }
+            catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        } catch (IOException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+        }
+
+    }
+
 }

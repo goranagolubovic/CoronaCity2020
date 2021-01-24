@@ -1,6 +1,8 @@
 package model;
 
-public class Alarm {
+import java.io.Serializable;
+
+public class Alarm implements Serializable {
     int firstCoordinate;//pozicije zarazene osobe i houseId
     int secondCoordinate;
     Long houseId;

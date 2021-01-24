@@ -1,6 +1,8 @@
 package model;
 
-public class PositionOfResident {
+import java.io.Serializable;
+
+public class PositionOfResident implements Serializable {
     private int firstCoordinate;
     private int secondCoordinate;
     public PositionOfResident(int i, int j){

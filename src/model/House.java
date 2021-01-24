@@ -1,6 +1,8 @@
 package model;
 
-public class House {
+import java.io.Serializable;
+
+public class House implements Serializable {
     private Long id;
     private int firstCoordinateOfHouse;
     private  int secondCoordinateOfHouse;

@@ -1,6 +1,8 @@
 package model;
 
-public class Clinic {
+import java.io.Serializable;
+
+public class Clinic implements Serializable {
     private int capacityOfClinic;
     public Clinic(int numberOfResidents){
      capacityOfClinic=numberOfResidents;

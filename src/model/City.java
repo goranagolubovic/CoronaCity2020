@@ -3,12 +3,13 @@ package model;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class City {
+public class City implements Serializable {
     public ArrayList<Pair> values = new ArrayList<Pair>();
     private Object[][] matrix;
     private boolean fieldOfMatrixFree = true;

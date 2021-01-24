@@ -2,11 +2,12 @@ package model;
 
 import model.Resident;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CityDataStore {
+public class CityDataStore implements Serializable {
 
     private static CityDataStore singleton;
 

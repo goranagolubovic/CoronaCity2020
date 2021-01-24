@@ -10,13 +10,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import util.JavaFXUtil;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 //import static model.City.isFieldOfMatrixFree;
 
-public abstract class Resident implements Runnable {
+public abstract class Resident implements Runnable, Serializable {
     protected Long id;
     protected String name;
     protected String surname;
@@ -35,14 +39,11 @@ public abstract class Resident implements Runnable {
     // From controller
     protected PositionOfResident newCoordinates;
     protected City city;
-    protected  static ControlStation previousControlStation;
+    protected ControlStation previousControlStation;
     protected PageController.SimulationStopped simulationStopped;
-    protected ImageView stopSimulationImageView;
-    protected ImageView sendAmbulanceImageView;
     protected DataAboutCoronaCity dataAboutCoronaCity;
     public static final Object locker = new Object();
     public static Stack<Alarm> stackOfAlarms = new Stack<Alarm>();
-    private PageController.AmbulanceArrived ambulanceArrived;
 
     public Resident(Long id, String name, String surname, Integer yearOfBirth, Gender gender, Long houseID) {
         this.id = id;
@@ -65,6 +66,7 @@ public abstract class Resident implements Runnable {
     @Override
     public void run() {
         boolean wait = true;
+        boolean backToHome = false;
         while (!simulationStopped.isSimulationStopped) {
             if (wait) {
                 try {
@@ -74,23 +76,24 @@ public abstract class Resident implements Runnable {
                     e1.printStackTrace();
                 }
             }
-            wait = movement();
+            wait = movement(backToHome);
             if (checkDistanceOfResidentAndControlStation()) { //&& PageController.isThreadRunning
-                if (bodyTemperature > 37.0) {
+                if (bodyTemperature > 50.0) {
                     stackOfAlarms.push(new Alarm(getCurrentPositionOfResident().getFirstCoordinate(), getCurrentPositionOfResident().getSecondCoordinate(), getHouseID()));
                     synchronized (PageController.lockerInfectedPerson) {
                         try {
 
                             PageController.lockerInfectedPerson.wait();
-                            Rectangle  rectangle=(Rectangle)city.getFieldOfMatrix(getCurrentPositionOfResident().getFirstCoordinate(),getCurrentPositionOfResident().getSecondCoordinate());
-                            if(rectangle.getUserData() instanceof Resident) {
-                                    rectangle.setUserData(null);
-                                    Platform.runLater(() -> {
-                                        rectangle.setFill(Color.rgb(238, 229, 222));
-                                    });
-                            }
-                            else {
-                                Platform.runLater(() -> {
+
+                            Rectangle rectangle = (Rectangle) city.getFieldOfMatrix(getCurrentPositionOfResident().getFirstCoordinate(), getCurrentPositionOfResident().getSecondCoordinate());
+                            if (rectangle.getUserData() instanceof Resident) {
+                                rectangle.setUserData(null);
+                                JavaFXUtil.runAndWait(() -> {
+
+                                    rectangle.setFill(Color.rgb(238, 229, 222));
+                                });
+                            } else {
+                                JavaFXUtil.runAndWait(() -> {
                                     rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
                                 });
                                 rectangle.setUserData(previousControlStation);
@@ -104,18 +107,18 @@ public abstract class Resident implements Runnable {
                     }
                 }
             }
-            if (stopSimulationImageView.isPressed()) {
-                synchronized (simulationStopped) {
-                    simulationStopped.isSimulationStopped = true;
-                }
-
-            }
+            backToHome = CityDataStore.getInstance()
+                    .getResidents()
+                    .stream()
+                    .anyMatch(res -> res.getHouseID() == houseID &&
+                            res.checkDistanceOfResidentAndControlStation() &&
+                            res.getBodyTemperature() > 50);
 
         }
 
     }
 
-    public boolean movement() {
+    public boolean movement(boolean backToHome) {
         Direction direction = chooseDirectionOfMovement();
         int firstCoordinate = positionOfResident.getFirstCoordinate();
         int secondCoordinate = positionOfResident.getSecondCoordinate();
@@ -128,81 +131,80 @@ public abstract class Resident implements Runnable {
         Object fieldContent = rectangle.getUserData();
         Rectangle oldRectangle;
 
-        List<ControlStation> controlStations = CityDataStore.getInstance().getControlStations();
-
-        Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == houseID).findFirst();
-        if (!checkBounds(optionalHouse.get(), direction, firstCoordinate, secondCoordinate, city)) {
-            return false;
-        }
-
-        switch (direction) {
-            case Up -> secondCoordinate--;
-            case Left -> firstCoordinate--;
-            case Right -> firstCoordinate++;
-            case Bottom -> secondCoordinate++;
-        }
-        nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-        nextRectangle = (Rectangle) nextField;
-        nextFieldContent = nextRectangle.getUserData();
-        synchronized (locker) {
-            if (!checkDistance(firstCoordinate, secondCoordinate)) {
-                //System.out.println("Distanca bi bila narusena");
+        if (!backToHome) {
+            Optional<House> optionalHouse = CityDataStore.getInstance().getHouses().stream().filter(h -> h.getId() == houseID).findFirst();
+            if (optionalHouse.isEmpty() || !checkBounds(optionalHouse.get(), direction, firstCoordinate, secondCoordinate, city)) {
                 return false;
             }
-        }
-        if (nextFieldContent instanceof Clinic ||
-                //nextFieldContent instanceof ControlStation ||
-                nextFieldContent instanceof House ||
-                nextFieldContent instanceof Resident) {
-            return false;
-        } //inace obrisi covjeka sa ruba matrice i na njegovo mjesto nacrtaj pravougaonik
 
-        if (!(fieldContent instanceof House)) {
+            switch (direction) {
+                case Up -> secondCoordinate--;
+                case Left -> firstCoordinate--;
+                case Right -> firstCoordinate++;
+                case Bottom -> secondCoordinate++;
+            }
+            nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+            nextRectangle = (Rectangle) nextField;
+            nextFieldContent = nextRectangle.getUserData();
             synchronized (locker) {
-                oldRectangle = (Rectangle) city.getFieldOfMatrix(newCoordinates.getFirstCoordinate(), newCoordinates.getSecondCoordinate());
-
-                if (previousControlStation != null) {
-                    for (int i = 0; i < CityDataStore.getInstance().getControlStations().size() - 1; i++) {
-                        if (previousControlStation.getFirstCoordinateOfControlStation() == controlStations.get(i).getFirstCoordinateOfControlStation()
-                                && previousControlStation.getSecondCoordinateOfControlStation() == controlStations.get(i).getSecondCoordinateOfControlStation()) {
-                            Platform.runLater(() -> {
-                                oldRectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
-                            });
-                            oldRectangle.setUserData(previousControlStation);
-                            previousControlStation = null;
-                            break;
-                        }
-                    }
-                } else {
-                    Platform.runLater(() -> {
-                        oldRectangle.setFill(Color.rgb(238, 229, 222));
-                    });
-                    oldRectangle.setUserData(null);
+                if (!checkDistance(firstCoordinate, secondCoordinate)) {
+                    return false;
                 }
+            }
+            if (nextFieldContent instanceof Clinic ||
+                    nextFieldContent instanceof House ||
+                    nextFieldContent instanceof Resident) {
+                return false;
+            }
+
+            if (!(fieldContent instanceof House)) {
+                synchronized (locker) {
+                    oldRectangle = (Rectangle) city.getFieldOfMatrix(newCoordinates.getFirstCoordinate(), newCoordinates.getSecondCoordinate());
+
+                    if (previousControlStation != null) {
+                        JavaFXUtil.runAndWait(() -> {
+                            oldRectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
+                        });
+                        oldRectangle.setUserData(previousControlStation);
+                    } else {
+                        JavaFXUtil.runAndWait(() -> oldRectangle.setFill(Color.rgb(238, 229, 222)));
+                        oldRectangle.setUserData(null);
+                    }
 //                synchronized (PageController.lockerThreadRunning) {
 //                    if (!PageController.isThreadRunning) {
 //                        return false;
 //                    }
 //                }
-                if (nextFieldContent instanceof ControlStation) {
-                    previousControlStation = (ControlStation) nextFieldContent;
+
                 }
             }
-        }
-        //pozicija stanovnika u toku kretanja
-        newCoordinates = new PositionOfResident(firstCoordinate, secondCoordinate);
-        positionOfResident = newCoordinates;
-        Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
-        synchronized (locker) {
-            if (newRectangle.getUserData() instanceof ControlStation) {
-                Platform.runLater(() -> newRectangle.setFill(new ImagePattern(getImageOfResidentWithThermometer())));
-            } else {
-                Platform.runLater(() -> newRectangle.setFill(new ImagePattern(getImageOfResident())));
-                newRectangle.setUserData(this);
+            if (nextFieldContent instanceof ControlStation) {
+                previousControlStation = (ControlStation) nextFieldContent;
+            }else {
+                previousControlStation = null;
             }
+            //pozicija stanovnika u toku kretanja
+            newCoordinates = new PositionOfResident(firstCoordinate, secondCoordinate);
+            positionOfResident = newCoordinates;
+            Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
+            synchronized (locker) {
+                if (newRectangle.getUserData() instanceof ControlStation) {
+                    JavaFXUtil.runAndWait(() -> newRectangle.setFill(new ImagePattern(getImageOfResidentWithThermometer())));
+                } else {
+                    JavaFXUtil.runAndWait(() -> newRectangle.setFill(new ImagePattern(getImageOfResident())));
+                    newRectangle.setUserData(this);
+                }
+            }
+
+        } else { //algoritam za vracanje stanovnika kuci najkracim putem
+//            while (getHouseWithConcretID(houseID).getFirstCoordinateOfHouse() != getCurrentPositionOfResident().getFirstCoordinate()) {
+//                while (getHouseWithConcretID(houseID).getSecondCoordinateOfHouse() != getCurrentPositionOfResident().getSecondCoordinate()) {
+//
+//                }
+//
+//            }
         }
         return true;
-
     }
 
 
@@ -288,9 +290,6 @@ public abstract class Resident implements Runnable {
         this.simulationStopped = simulationStopped;
     }
 
-    public void setStopSimulationImageView(ImageView stopSimulationImageView) {
-        this.stopSimulationImageView = stopSimulationImageView;
-    }
 
     public Long getId() {
         return id;
@@ -364,15 +363,15 @@ public abstract class Resident implements Runnable {
     public static String getSurnameRandomly() {
         return arrayOfSurnames[new Random().nextInt(arrayOfSurnames.length - 1)];
     }
-
-    public void setSendAmbulanceImageView(ImageView sendAmbulanceImageView) {
-        this.sendAmbulanceImageView = sendAmbulanceImageView;
+    public House getHouseWithConcretID(Long id){
+        for(House house:CityDataStore.getInstance().getHouses()){
+            if(house.getId()==id){
+                return house;
+            }
+        }
+        return null;
     }
 
-
-    public void setAmbulanceArrived(PageController.AmbulanceArrived ambulanceArrived) {
-        this.ambulanceArrived = ambulanceArrived;
-    }
 }
 
 //}
