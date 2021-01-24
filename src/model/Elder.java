@@ -1,5 +1,7 @@
 package model;
 
+import components.ElderComponent;
+import components.ResidentComponent;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -20,38 +22,8 @@ public class Elder extends Resident {
     }
 
     @Override
-    public boolean checkBounds(House house, Direction direction, Integer firstCoordinate, Integer secondCoordinate, City city) {
-        switch (direction) {
-            case Up -> {
-                return (secondCoordinate > 0 && secondCoordinate > house.getSecondCoordinateOfHouse() - 3);
-            }
-            case Left -> {
-                return (firstCoordinate > 0 && firstCoordinate > house.getFirstCoordinateOfHouse() - 3);
-            }
-            case Right -> {
-                return (firstCoordinate < city.getMatrix().length - 1 && firstCoordinate < house.getFirstCoordinateOfHouse() + 3);
-            }
-            case Bottom -> {
-                return (secondCoordinate < city.getMatrix().length - 1 && secondCoordinate < house.getSecondCoordinateOfHouse() + 3);
-            }
-            default -> {
-                return false;
-            }
-        }
+    public ResidentComponent mapToComponent() {
+        return new ElderComponent(this);
     }
-
-    @Override
-    public Image getImageOfResident() {
-        return new Image("view/images/elder.png");
-    }
-
-    @Override
-    public Image getImageOfResidentWithThermometer() { return new Image("view/images/thermometer+elder.png"); }
-
-    @Override
-    public boolean checkDistance(int firstCoordinate, int secondCoordinate) {
-        return city.checkDistanceOfField(firstCoordinate, secondCoordinate, 1, Elder.class, Adult.class);
-    }
-
 
 }

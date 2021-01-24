@@ -1,5 +1,6 @@
 package model;
 
+import components.ResidentComponent;
 import model.Resident;
 
 import java.io.Serializable;
@@ -13,14 +14,15 @@ public class CityDataStore implements Serializable {
 
     private List<Resident> residents;
     private List<House> houses;
-    private List<ControlStation>controlStations;
-    private List<Clinic>clinics;
+    private List<ControlStation> controlStations;
+    private List<Clinic> clinics;
+    private int citySize;
 
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
-        controlStations=new ArrayList<>();
-        clinics=new ArrayList<>();
+        controlStations = new ArrayList<>();
+        clinics = new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
@@ -36,10 +38,12 @@ public class CityDataStore implements Serializable {
         house.setId(createHouseID());
         houses.add(house);
     }
-    public synchronized void addControlStation(ControlStation controlStation){
+
+    public synchronized void addControlStation(ControlStation controlStation) {
         controlStations.add(controlStation);
     }
-    public synchronized void addClinic(Clinic clinic){
+
+    public synchronized void addClinic(Clinic clinic) {
         clinics.add(clinic);
     }
 
@@ -78,10 +82,31 @@ public class CityDataStore implements Serializable {
         this.houses = houses;
     }
 
-    public  List<ControlStation> getControlStations(){
+    public List<ControlStation> getControlStations() {
         return controlStations;
     }
-    public void setControlStations(List<ControlStation>controlStations){
-        this.controlStations=controlStations;
+
+    public void setControlStations(List<ControlStation> controlStations) {
+        this.controlStations = controlStations;
+    }
+
+    public void setCitySize(int citySize) {
+        this.citySize = citySize;
+    }
+
+    public int getCitySize() {
+        return citySize;
+    }
+
+    public List<Clinic> getClinics() {
+        return clinics;
+    }
+
+    public void setClinics(List<Clinic> clinics) {
+        this.clinics = clinics;
+    }
+
+    public void loadData(CityDataStore deserializabledData) {
+        singleton = deserializabledData;
     }
 }

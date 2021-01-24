@@ -1,5 +1,6 @@
 package controller;
 
+import components.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,12 +13,17 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import model.*;
+import util.JavaFXUtil;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 
 public class PageController implements Initializable {
 
@@ -60,6 +66,8 @@ public class PageController implements Initializable {
     private ImageView sendAmbulanceImageView;
     @FXML
     private ImageView stopSimulationImageView;
+    @FXML
+    private ImageView runAgainImageView;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -76,6 +84,7 @@ public class PageController implements Initializable {
 
     private void initImageViews() {
         allowMovementImageView.setOnMouseClicked(this::allowMovement);
+        runAgainImageView.setOnMouseClicked(this::startSimulationAgain);
         //sendAmbulanceImageView.setOnMouseClicked(this::sendAmbulance);
     }
 
@@ -101,7 +110,8 @@ public class PageController implements Initializable {
             for (int j = 0; j < city.getMatrix().length; j++) {
                 if ((i == 0 && j == 0) || (i == 0 && j == (city.getMatrix().length - 1)) || (j == 0 && i == (city.getMatrix().length - 1)) || (i == (city.getMatrix().length - 1) && j == (city.getMatrix().length - 1))) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-                    Clinic clinic = new Clinic(10 / 100 * (numberOfResidents) + (random.nextInt() * (15 / 100 * numberOfResidents - 10 / 100 * numberOfResidents)));
+                    int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextInt() * (15.0 / 100 * numberOfResidents - 10.0 / 100 * numberOfResidents)));
+                    Clinic clinic = new Clinic(clinicCapacity, i, j);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
@@ -180,6 +190,7 @@ public class PageController implements Initializable {
             Adult adult = new Adult(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseId);
             adult.setCurrentPositionOfResident(randomHouse.getFirstCoordinateOfHouse(), randomHouse.getSecondCoordinateOfHouse());
             CityDataStore.getInstance().addResident(adult);
+            ComponentsCityDataStore.getInstance().addResident(new AdultComponent(adult));
 
         }
         for (int s = 0; s < dataAboutCoronaCity.getStari(); s++) {
@@ -191,6 +202,7 @@ public class PageController implements Initializable {
             Gender gender = new Random().nextInt(100) < 50 ? Gender.Female : Gender.Male;
             Elder elder = new Elder(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseId);
             CityDataStore.getInstance().addResident(elder);
+            ComponentsCityDataStore.getInstance().addResident(new ElderComponent(elder));
             elder.getCurrentPositionOfResident().setFirstCoordinate(randomHouse.getFirstCoordinateOfHouse());
             elder.getCurrentPositionOfResident().setSecondCoordinate(randomHouse.getSecondCoordinateOfHouse());
         }
@@ -207,6 +219,7 @@ public class PageController implements Initializable {
             Gender gender = new Random().nextInt(100) < 50 ? Gender.Female : Gender.Male;
             Child child = new Child(null, Resident.getNameRandomly(), Resident.getSurnameRandomly(), year, gender, houseIDsSafeForKids[index]);
             CityDataStore.getInstance().addResident(child);
+            ComponentsCityDataStore.getInstance().addResident(new ChildComponent(child));
             child.getCurrentPositionOfResident().setFirstCoordinate(randomHouse.getFirstCoordinateOfHouse());
             child.getCurrentPositionOfResident().setSecondCoordinate(randomHouse.getSecondCoordinateOfHouse());
         }
@@ -278,8 +291,8 @@ public class PageController implements Initializable {
     private void allowMovement(MouseEvent e) {
         Thread t2 = new Thread(() -> {
 
-            List<Resident> residents = CityDataStore.getInstance().getResidents();
-            for (Resident resident : residents) {
+            List<ResidentComponent> residentsComponents = ComponentsCityDataStore.getInstance().getResidents();
+            for (ResidentComponent resident : residentsComponents) {
                 resident.setDataAboutCoronaCity(dataAboutCoronaCity);
                 resident.setSimulationStopped(simulationStopped);
                 resident.setCity(city);
@@ -307,8 +320,8 @@ public class PageController implements Initializable {
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
                 }
-                while (!Resident.stackOfAlarms.empty()) {
-                    alarm = Resident.stackOfAlarms.pop();
+                while (!ResidentComponent.stackOfAlarms.empty()) {
+                    alarm = ResidentComponent.stackOfAlarms.pop();
                     alarms.add(alarm);
                     Platform.runLater(() -> {
                         Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -362,22 +375,133 @@ public class PageController implements Initializable {
     void reviewStateOfClinics(MouseEvent e) {
 
     }
+
     @FXML
     void pauseSimulation(MouseEvent e) {
-        File file=new File("states");
+        simulationStopped.isSimulationStopped = true;
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException interruptedException) {
+            interruptedException.printStackTrace();
+        }
+        File file = new File("states");
         file.mkdirs();
-        file=new File("states/"+System.currentTimeMillis()+".ser");
-        try (FileOutputStream fos=new FileOutputStream(file)) {
-            try(ObjectOutputStream oos=new ObjectOutputStream(fos)){
+        file = new File("states/" + System.currentTimeMillis() + ".ser");
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
                 oos.writeObject(CityDataStore.getInstance());
-            }
-            catch (IOException ioException) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Kretanje pauzirano i izvrsena serijalizacija.");
+                    alert.showAndWait();
+                });
+            } catch (IOException ioException) {
                 ioException.printStackTrace();
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
+                    alert.showAndWait();
+                });
             }
         } catch (IOException fileNotFoundException) {
             fileNotFoundException.printStackTrace();
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
+                alert.showAndWait();
+            });
         }
+    }
 
+    void startSimulationAgain(MouseEvent e) {
+        System.out.println("start sim again.");
+        new Thread(() -> {
+
+            simulationStopped.isSimulationStopped = true;
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+            FileChooser.ExtensionFilter serFilter
+                    = new FileChooser.ExtensionFilter("Serializabled files", "*.ser");
+
+            FileChooser fc = new FileChooser();
+            fc.getExtensionFilters().add(serFilter);
+
+            File initial = new File("states/");
+            initial.mkdir();
+            fc.setInitialDirectory(initial);
+            var wrapper = new Object() {File file = null;};
+            JavaFXUtil.runAndWait(() -> wrapper.file = fc.showOpenDialog(runAgainImageView.getScene().getWindow()));
+
+            try (FileInputStream fis = new FileInputStream(wrapper.file)) {
+                try (ObjectInputStream ois = new ObjectInputStream(fis)) {
+                    try {
+                        CityDataStore.getInstance().loadData((CityDataStore) ois.readObject());
+                    } catch (ClassNotFoundException classNotFoundException) {
+                        classNotFoundException.printStackTrace();
+                    }
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Kretanje nastavljeno i izvrsena deserijalizacija.");
+                        alert.showAndWait();
+                    });
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
+                        alert.showAndWait();
+                    });
+                }
+            } catch (IOException fileNotFoundException) {
+                fileNotFoundException.printStackTrace();
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
+                    alert.showAndWait();
+                });
+            }
+            ComponentsCityDataStore.getInstance().setResidents(CityDataStore
+                    .getInstance()
+                    .getResidents()
+                    .stream()
+                    .map(Resident::mapToComponent)
+                    .collect(Collectors.toList()));
+
+            for (int i = 0; i < city.getMatrix().length; i++) {
+                for (int j = 0; j < city.getMatrix().length; j++) {
+                    Rectangle rect = (Rectangle) city.getMatrix()[i][j];
+                    JavaFXUtil.runAndWait(() -> rect.setFill(Color.rgb(238, 229, 222)));
+                    rect.setUserData(null);
+                }
+            }
+            for (var residentComponent : ComponentsCityDataStore.getInstance().getResidents()) {
+                var position = residentComponent.getResident().getCurrentPositionOfResident();
+                Rectangle rect = (Rectangle) city.getMatrix()[position.getFirstCoordinate()][position.getSecondCoordinate()];
+                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(residentComponent.getImageOfResident())));
+                rect.setUserData(residentComponent);
+            }
+            for (var house : CityDataStore.getInstance().getHouses()) {
+                Rectangle rect = (Rectangle) city.getMatrix()[house.getFirstCoordinateOfHouse()][house.getSecondCoordinateOfHouse()];
+                if (!(rect.getUserData() instanceof ResidentComponent)) {
+                    rect.setUserData(house);
+                }
+                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/home.png"))));
+            }
+            for (var clinic : CityDataStore.getInstance().getClinics()) {
+                Rectangle rect = (Rectangle) city.getMatrix()[clinic.getFirstCoordinate()][clinic.getSecondCoordinate()];
+                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/clinic.png"))));
+                rect.setUserData(clinic);
+            }
+            for (var controlStation : CityDataStore.getInstance().getControlStations()) {
+                Rectangle rect = (Rectangle) city.getMatrix()[controlStation.getFirstCoordinateOfControlStation()][controlStation.getSecondCoordinateOfControlStation()];
+                if (rect.getUserData() instanceof ResidentComponent) {
+                    JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(((ResidentComponent) rect.getUserData()).getImageOfResidentWithThermometer())));
+                } else {
+                    JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/thermometer.png"))));
+                    rect.setUserData(controlStation);
+                }
+            }
+            simulationStopped.isSimulationStopped = false;
+            allowMovement(e);
+
+        }).start();
     }
 
 }
