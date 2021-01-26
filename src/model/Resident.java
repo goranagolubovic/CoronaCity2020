@@ -11,11 +11,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import util.JavaFXUtil;
 
+import javax.swing.*;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -33,7 +36,9 @@ public abstract class Resident implements  Serializable {
     protected final double maxTemperature = 40;
     protected static final String[] arrayOfNames = {"S", "M", "K", "V", "T", "U", "I", "L", "D", "B"};
     protected static final String[] arrayOfSurnames = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    protected Queue<Double> threeLastBodyTemperatures = new CircularFifoQueue<Double>(3);
     protected PositionOfResident positionOfResident;
+    protected boolean isInfected = false;
 
 
     public Resident(Long id, String name, String surname, Integer yearOfBirth, Gender gender, Long houseID) {
@@ -50,6 +55,10 @@ public abstract class Resident implements  Serializable {
                 Random temperature = new Random();
                 DecimalFormat df = new DecimalFormat("0.0");
                 bodyTemperature = Double.parseDouble(df.format(minTemperature + (temperature.nextDouble() * (maxTemperature - minTemperature))));
+                threeLastBodyTemperatures.add(bodyTemperature);
+                int size = threeLastBodyTemperatures.size();
+                double average = threeLastBodyTemperatures.stream().reduce(0.0, (a, b) -> a + b)/size;
+                isInfected = average>37.0;
             }
         }, 0, 10_000);
         positionOfResident = new PositionOfResident(0, 0);
@@ -151,6 +160,26 @@ public abstract class Resident implements  Serializable {
         return null;
     }
 
+    public boolean isResidentInHouse() {
+        return (getCurrentPositionOfResident().getFirstCoordinate()==getHouseWithConcretID(this.getHouseID()).getFirstCoordinateOfHouse()
+                && getCurrentPositionOfResident().getSecondCoordinate()==getHouseWithConcretID(this.getHouseID()).getSecondCoordinateOfHouse());
+    }
+
+    public Queue<Double> getThreeLastBodyTemperatures() {
+        return threeLastBodyTemperatures;
+    }
+
+    public void setThreeLastBodyTemperatures(Queue<Double> threeLastBodyTemperatures) {
+        this.threeLastBodyTemperatures = threeLastBodyTemperatures;
+    }
+
+    public boolean isInfected() {
+        return isInfected;
+    }
+
+    public void setInfected(boolean infected) {
+        isInfected = infected;
+    }
 }
 
 //}

@@ -110,7 +110,9 @@ public class PageController implements Initializable {
             for (int j = 0; j < city.getMatrix().length; j++) {
                 if ((i == 0 && j == 0) || (i == 0 && j == (city.getMatrix().length - 1)) || (j == 0 && i == (city.getMatrix().length - 1)) || (i == (city.getMatrix().length - 1) && j == (city.getMatrix().length - 1))) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-                    int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextInt() * (15.0 / 100 * numberOfResidents - 10.0 / 100 * numberOfResidents)));
+                    //int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
+                    int clinicCapacity=4;
+                    System.out.println("Kapacitet novokreirane klinike je "+clinicCapacity);
                     Clinic clinic = new Clinic(clinicCapacity, i, j);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
@@ -333,6 +335,20 @@ public class PageController implements Initializable {
             }
         });
         t3.start();
+        Thread thread1=new Thread(() ->{
+        while(true) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+            for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
+                clinic.removeRecoveredResident();
+            }
+        }
+    });
+
+        thread1.start();
     }
 
     @FXML
@@ -356,10 +372,10 @@ public class PageController implements Initializable {
             System.out.println("Poslano");
             synchronized (lockerInfectedPerson) {
                 synchronized (lockerThreadRunning) {
-                    isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
-
+                    //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
                 }
                 lockerInfectedPerson.notify();
+
             }
         });
         thread.start();

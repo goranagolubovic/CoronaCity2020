@@ -38,6 +38,16 @@ public class ChildComponent extends ResidentComponent {
     public Image getImageOfResidentWithThermometer() { return new Image("view/images/thermometer+child.png"); }
 
     @Override
+    public Image getImageOfResidentWithClinic() {
+        return new Image("view/images/clinic+child.png");
+    }
+
+    @Override
+    public Image getImageOfResidentWithHouse() {
+        return new Image("view/images/home+child.png");
+    }
+
+    @Override
     public boolean checkDistance(int firstCoordinate, int secondCoordinate) {
         return true;
     }

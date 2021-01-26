@@ -41,6 +41,16 @@ public class AdultComponent extends ResidentComponent {
     public Image getImageOfResidentWithThermometer() { return new Image("view/images/thermometer+adult.png"); }
 
     @Override
+    public Image getImageOfResidentWithClinic() {
+        return new Image("view/images/clinic+adult.png");
+    }
+
+    @Override
+    public Image getImageOfResidentWithHouse() {
+        return new Image("view/images/home+adult.png");
+    }
+
+    @Override
     public boolean checkDistance(int firstCoordinate, int secondCoordinate) {
         return city.checkDistanceOfField(firstCoordinate, secondCoordinate, 1, Elder.class, Adult.class);
     }
