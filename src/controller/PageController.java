@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class PageController implements Initializable {
@@ -111,13 +112,31 @@ public class PageController implements Initializable {
                 if ((i == 0 && j == 0) || (i == 0 && j == (city.getMatrix().length - 1)) || (j == 0 && i == (city.getMatrix().length - 1)) || (i == (city.getMatrix().length - 1) && j == (city.getMatrix().length - 1))) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
                     //int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
-                    int clinicCapacity=4;
-                    System.out.println("Kapacitet novokreirane klinike je "+clinicCapacity);
+                    int clinicCapacity = 4;
+                    System.out.println("Kapacitet novokreirane klinike je " + clinicCapacity);
                     Clinic clinic = new Clinic(clinicCapacity, i, j);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                     rectangle.setUserData(clinic);
+                    int finalI = i;
+                    int finalJ = j;
+                    rectangle.setOnMouseClicked(event -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name" );
+                        content.append(System.lineSeparator());
+                        List<Resident> residents = CityDataStore.getInstance()
+                                .getResidents()
+                                .stream()
+                                .filter(res -> res.getCurrentPositionOfResident().getFirstCoordinate() == finalI &&
+                                        res.getCurrentPositionOfResident().getSecondCoordinate() == finalJ)
+                                .collect(Collectors.toList());
+                        for (Resident res : residents) {
+                            content.append(res.getId()).append(",");
+                        }
+                        alert.setContentText(content.toString());
+                        alert.show();
+                    });
                     CityDataStore.getInstance().addClinic(clinic);
                     try {
                         city.setFieldOfMatrix(rectangle, i, j);
@@ -171,7 +190,18 @@ public class PageController implements Initializable {
                 house.setSecondCoordinateOfHouse(jPosition);
                 rectangle.setOnMouseClicked(event -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setContentText("x=" + house.getFirstCoordinateOfHouse() + ", y=" + house.getSecondCoordinateOfHouse() + ", name" + rectangle.getUserData().getClass().getName());
+                    StringBuilder content = new StringBuilder("x=" + house.getFirstCoordinateOfHouse() + ", y=" + house.getSecondCoordinateOfHouse() + ", name" );
+                    content.append(System.lineSeparator());
+                    List<Resident> residents = CityDataStore.getInstance()
+                            .getResidents()
+                            .stream()
+                            .filter(res -> res.getCurrentPositionOfResident().getFirstCoordinate() == house.getFirstCoordinateOfHouse() &&
+                                    res.getCurrentPositionOfResident().getSecondCoordinate() == house.getSecondCoordinateOfHouse())
+                            .collect(Collectors.toList());
+                    for (Resident res : residents) {
+                        content.append(res.getId()).append(",");
+                    }
+                    alert.setContentText(content.toString());
                     alert.show();
                 });
                 br++;
@@ -270,11 +300,30 @@ public class PageController implements Initializable {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
+                    int finalI = i;
+                    int finalJ = j;
+                    rectangle.setOnMouseClicked(event -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name" );
+                        content.append(System.lineSeparator());
+                        List<Resident> residents = CityDataStore.getInstance()
+                                .getResidents()
+                                .stream()
+                                .filter(res -> res.getCurrentPositionOfResident().getFirstCoordinate() == finalI &&
+                                        res.getCurrentPositionOfResident().getSecondCoordinate() == finalJ)
+                                .collect(Collectors.toList());
+                        for (Resident res : residents) {
+                            content.append(res.getId()).append(",");
+                        }
+                        alert.setContentText(content.toString());
+                        alert.show();
+                    });
                     map.add(rectangle, i, j);
                     city.setFieldOfMatrix(rectangle, i, j);
                 }
             }
         }
+
     }
 
     public void loadProperty() throws IOException {
@@ -335,18 +384,18 @@ public class PageController implements Initializable {
             }
         });
         t3.start();
-        Thread thread1=new Thread(() ->{
-        while(true) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
+        Thread thread1 = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+                for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
+                    clinic.removeRecoveredResident();
+                }
             }
-            for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
-                clinic.removeRecoveredResident();
-            }
-        }
-    });
+        });
 
         thread1.start();
     }
@@ -375,7 +424,6 @@ public class PageController implements Initializable {
                     //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
                 }
                 lockerInfectedPerson.notify();
-
             }
         });
         thread.start();
@@ -445,7 +493,9 @@ public class PageController implements Initializable {
             File initial = new File("states/");
             initial.mkdir();
             fc.setInitialDirectory(initial);
-            var wrapper = new Object() {File file = null;};
+            var wrapper = new Object() {
+                File file = null;
+            };
             JavaFXUtil.runAndWait(() -> wrapper.file = fc.showOpenDialog(runAgainImageView.getScene().getWindow()));
 
             try (FileInputStream fis = new FileInputStream(wrapper.file)) {
@@ -490,7 +540,7 @@ public class PageController implements Initializable {
             for (var residentComponent : ComponentsCityDataStore.getInstance().getResidents()) {
                 var position = residentComponent.getResident().getCurrentPositionOfResident();
                 Rectangle rect = (Rectangle) city.getMatrix()[position.getFirstCoordinate()][position.getSecondCoordinate()];
-                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(residentComponent.getImageOfResident())));
+                JavaFXUtil.runAndWait(() -> rect.setFill(new ImagePattern(residentComponent.getImageOfResident())));
                 rect.setUserData(residentComponent);
             }
             for (var house : CityDataStore.getInstance().getHouses()) {
@@ -498,19 +548,19 @@ public class PageController implements Initializable {
                 if (!(rect.getUserData() instanceof ResidentComponent)) {
                     rect.setUserData(house);
                 }
-                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/home.png"))));
+                JavaFXUtil.runAndWait(() -> rect.setFill(new ImagePattern(new Image("view/images/home.png"))));
             }
             for (var clinic : CityDataStore.getInstance().getClinics()) {
                 Rectangle rect = (Rectangle) city.getMatrix()[clinic.getFirstCoordinate()][clinic.getSecondCoordinate()];
-                JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/clinic.png"))));
+                JavaFXUtil.runAndWait(() -> rect.setFill(new ImagePattern(new Image("view/images/clinic.png"))));
                 rect.setUserData(clinic);
             }
             for (var controlStation : CityDataStore.getInstance().getControlStations()) {
                 Rectangle rect = (Rectangle) city.getMatrix()[controlStation.getFirstCoordinateOfControlStation()][controlStation.getSecondCoordinateOfControlStation()];
                 if (rect.getUserData() instanceof ResidentComponent) {
-                    JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(((ResidentComponent) rect.getUserData()).getImageOfResidentWithThermometer())));
+                    JavaFXUtil.runAndWait(() -> rect.setFill(new ImagePattern(((ResidentComponent) rect.getUserData()).getImageOfResidentWithThermometer())));
                 } else {
-                    JavaFXUtil.runAndWait(() ->rect.setFill(new ImagePattern(new Image("view/images/thermometer.png"))));
+                    JavaFXUtil.runAndWait(() -> rect.setFill(new ImagePattern(new Image("view/images/thermometer.png"))));
                     rect.setUserData(controlStation);
                 }
             }

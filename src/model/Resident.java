@@ -24,7 +24,7 @@ import java.util.concurrent.FutureTask;
 
 //import static model.City.isFieldOfMatrixFree;
 
-public abstract class Resident implements  Serializable {
+public abstract class Resident implements Serializable {
     protected Long id;
     protected String name;
     protected String surname;
@@ -57,8 +57,8 @@ public abstract class Resident implements  Serializable {
                 bodyTemperature = Double.parseDouble(df.format(minTemperature + (temperature.nextDouble() * (maxTemperature - minTemperature))));
                 threeLastBodyTemperatures.add(bodyTemperature);
                 int size = threeLastBodyTemperatures.size();
-                double average = threeLastBodyTemperatures.stream().reduce(0.0, (a, b) -> a + b)/size;
-                isInfected = average>37.0;
+                double average = threeLastBodyTemperatures.stream().reduce(0.0, (a, b) -> a + b) / size;
+                isInfected = average > 37.0;
             }
         }, 0, 10_000);
         positionOfResident = new PositionOfResident(0, 0);
@@ -151,9 +151,10 @@ public abstract class Resident implements  Serializable {
     public static String getSurnameRandomly() {
         return arrayOfSurnames[new Random().nextInt(arrayOfSurnames.length - 1)];
     }
-    public House getHouseWithConcretID(Long id){
-        for(House house:CityDataStore.getInstance().getHouses()){
-            if(house.getId()==id){
+
+    public House getHouseWithConcretID(Long id) {
+        for (House house : CityDataStore.getInstance().getHouses()) {
+            if (house.getId() == id) {
                 return house;
             }
         }
@@ -161,8 +162,8 @@ public abstract class Resident implements  Serializable {
     }
 
     public boolean isResidentInHouse() {
-        return (getCurrentPositionOfResident().getFirstCoordinate()==getHouseWithConcretID(this.getHouseID()).getFirstCoordinateOfHouse()
-                && getCurrentPositionOfResident().getSecondCoordinate()==getHouseWithConcretID(this.getHouseID()).getSecondCoordinateOfHouse());
+        return (getCurrentPositionOfResident().getFirstCoordinate() == getHouseWithConcretID(this.getHouseID()).getFirstCoordinateOfHouse()
+                && getCurrentPositionOfResident().getSecondCoordinate() == getHouseWithConcretID(this.getHouseID()).getSecondCoordinateOfHouse());
     }
 
     public Queue<Double> getThreeLastBodyTemperatures() {
@@ -179,6 +180,15 @@ public abstract class Resident implements  Serializable {
 
     public void setInfected(boolean infected) {
         isInfected = infected;
+    }
+
+    public boolean isInClinic() {
+        List<Clinic> listOfClinics = CityDataStore.getInstance().getClinics();
+        for (Clinic c : listOfClinics) {
+            if (c.getInfectedResidents().stream().anyMatch(res -> res.getId() == id))
+                return true;
+        }
+        return false;
     }
 }
 

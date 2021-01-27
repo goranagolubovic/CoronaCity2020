@@ -1,20 +1,22 @@
 package model;
 
+import components.ComponentsCityDataStore;
+import components.ResidentComponent;
 import controller.PageController;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
-public  class Clinic implements Serializable {
+public class Clinic implements Serializable {
     private int capacityOfClinic;
     private int firstCoordinate;
     private int secondCoordinate;
 
 
-    private  List<Resident> infectedResidents=new ArrayList<>();
-    public static final Object lockerInfectedInmate=new Object();
+    private List<Resident> infectedResidents = new ArrayList<>();
     protected PageController.SimulationStopped simulationStopped;
 
     public Clinic(int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
@@ -22,6 +24,7 @@ public  class Clinic implements Serializable {
         this.firstCoordinate = firstCoordinate;
         this.secondCoordinate = secondCoordinate;
     }
+
     public List<Resident> getInfectedResidents() {
         return infectedResidents;
     }
@@ -29,8 +32,9 @@ public  class Clinic implements Serializable {
     public void setInfectedResidents(List<Resident> infectedResidents) {
         this.infectedResidents = infectedResidents;
     }
-    public boolean addInfectedResident(Resident resident){
-        if(capacityOfClinic>0) {
+
+    public synchronized boolean addInfectedResident(Resident resident) {
+        if (capacityOfClinic > 0) {
             resident.setCurrentPositionOfResident(firstCoordinate, secondCoordinate);
             infectedResidents.add(resident);
             capacityOfClinic--;
@@ -38,24 +42,34 @@ public  class Clinic implements Serializable {
         }
         return false;
     }
-          public List<Resident> removeRecoveredResident() {
-              List<Resident> recoveredResidents = new ArrayList<>();
-              if (!infectedResidents.isEmpty()) {
-                  infectedResidents.stream().forEach(res -> {
-                      if (!res.isInfected()) {
-                          recoveredResidents.add(res);
-                          infectedResidents.remove(res);
-                          capacityOfClinic++;
-                          System.out.println("Stanovnik " + res.getId() + "se oporavio.");
-                          synchronized (lockerInfectedInmate) {
-                              lockerInfectedInmate.notify();
-                          }
-                      }
-                  });
-                  return recoveredResidents;
-              }
-              return null;
-          }
+
+    public synchronized List<Resident> removeRecoveredResident() {
+        List<Resident> recoveredResidents = new ArrayList<>();
+        for (int i = 0, infectedResidentsSize = infectedResidents.size(); i < infectedResidentsSize; i++) {
+            Resident res = infectedResidents.get(i);
+            if (!res.isInfected()) {
+                recoveredResidents.add(res);
+                infectedResidents.remove(res);
+                capacityOfClinic++;
+                System.out.println("Stanovnik " + res.getId() + "se oporavio.");
+                //zarazeni se vraca kuci nakon oporavka
+                res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
+                        res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+                Optional<ResidentComponent> opt = ComponentsCityDataStore
+                        .getInstance()
+                        .getResidents()
+                        .stream()
+                        .filter(r -> res.getId() == r.getResident().getId())
+                        .findFirst();
+                if (opt.isPresent()) {
+                    synchronized (opt.get().getLockerInfected()) {
+                        opt.get().getLockerInfected().notifyAll();
+                    }
+                }
+            }
+        }
+        return recoveredResidents;
+    }
 
     public int getCapacityOfClinic() {
         return capacityOfClinic;
