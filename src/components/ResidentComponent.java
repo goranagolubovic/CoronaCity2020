@@ -51,8 +51,8 @@ public abstract class ResidentComponent implements Runnable {
         while (!simulationStopped.isSimulationStopped) {
             if (wait) {
                 try {
-                    Thread.sleep(2000);
-                    Thread.sleep((long) (50 + new Random().nextDouble() * 300));
+                    Thread.sleep(1200);
+                    //Thread.sleep((long) (50 + new Random().nextDouble() * 300));
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
@@ -70,16 +70,29 @@ public abstract class ResidentComponent implements Runnable {
                         PageController.lockerInfectedPerson.wait();
 
                         Rectangle rectangle = (Rectangle) city.getFieldOfMatrix(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate());
-                        if (rectangle.getUserData() instanceof Resident) {
+                        if (!(rectangle.getUserData() instanceof ControlStation || rectangle.getUserData() instanceof Clinic
+                        || rectangle.getUserData() instanceof House)) {
                             rectangle.setUserData(null);
                             JavaFXUtil.runAndWait(() -> {
                                 rectangle.setFill(Color.rgb(238, 229, 222));
                             });
-                        } else {
+                        } else if(rectangle.getUserData() instanceof ControlStation) {
                             JavaFXUtil.runAndWait(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
                             });
                             rectangle.setUserData(previousControlStation);
+                        }
+                        else if(rectangle.getUserData() instanceof House){
+                            JavaFXUtil.runAndWait(() -> {
+                                rectangle.setFill(new ImagePattern(new Image("view/images/home.png")));
+                            });
+                            rectangle.setUserData(previousHouse);
+                        }
+                        else{
+                            JavaFXUtil.runAndWait(() -> {
+                                rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
+                            });
+                            rectangle.setUserData(previousClinic);
                         }
                         for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize; i++) {
                             Clinic clinic = clinics.get(i);
@@ -220,7 +233,9 @@ public abstract class ResidentComponent implements Runnable {
 //                        return false;
 //                    }
 //                }
-
+               previousHouse=null;
+                previousClinic=null;
+                previousControlStation=null;
             }
         }
         if (nextFieldContent instanceof ControlStation) {
@@ -256,6 +271,7 @@ public abstract class ResidentComponent implements Runnable {
             }
             return false;
         }
+
         Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
         synchronized (locker) {
             if (newRectangle.getUserData() instanceof ControlStation) {

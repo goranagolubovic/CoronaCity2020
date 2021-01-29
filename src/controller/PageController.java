@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -13,17 +14,21 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import model.*;
 import util.JavaFXUtil;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 
 public class PageController implements Initializable {
@@ -69,6 +74,10 @@ public class PageController implements Initializable {
     private ImageView stopSimulationImageView;
     @FXML
     private ImageView runAgainImageView;
+    @FXML
+    private Text infectedPatients;
+    @FXML
+    private ScrollPane clinicScrollPane;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -393,6 +402,7 @@ public class PageController implements Initializable {
                 }
                 for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
                     clinic.removeRecoveredResident();
+                    detectChangeOfFile();
                 }
             }
         });
@@ -566,6 +576,48 @@ public class PageController implements Initializable {
             }
             simulationStopped.isSimulationStopped = false;
             allowMovement(e);
+
+        }).start();
+    }
+    private void detectChangeOfFile(){
+        new Thread(()->{
+            WatchService watcher = null;
+            try {
+                watcher = FileSystems.getDefault().newWatchService();
+                Path dir = Paths.get("C:\\Users\\goran\\Desktop\\PJ2_Projekat");
+                dir.register(watcher, ENTRY_MODIFY);
+                while (true) {
+                    WatchKey key;
+                    try {
+                        key = watcher.take();
+                    } catch (InterruptedException ex) {
+                        return;
+                    }
+
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        WatchEvent<Path> ev = (WatchEvent<Path>) event;
+                        Path fileName = ev.context();
+                        if(fileName.toString().trim().equals("clinic-info.txt")) {
+                            List<String> content = Files.readAllLines(dir.resolve(fileName));
+                            for(String s: content)
+                                infectedPatients.setText(s);
+                            //clinicScrollPane.setFitToWidth(true);
+                            //Platform.runLater(()-> {
+                            //    clinicScrollPane.setContent(infectedPatients);
+                            //});
+                        }
+                    }
+
+                    boolean valid = key.reset();
+                    if (!valid) {
+                        break;
+                    }
+                }
+
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }).start();
     }

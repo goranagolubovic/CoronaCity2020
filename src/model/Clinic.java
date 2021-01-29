@@ -4,7 +4,7 @@ import components.ComponentsCityDataStore;
 import components.ResidentComponent;
 import controller.PageController;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,10 +15,11 @@ public class Clinic implements Serializable {
     private int firstCoordinate;
     private int secondCoordinate;
 
+    private static  int numberOfPatients=0;
+
 
     private List<Resident> infectedResidents = new ArrayList<>();
     protected PageController.SimulationStopped simulationStopped;
-
     public Clinic(int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
         this.capacityOfClinic = capacityOfClinic;
         this.firstCoordinate = firstCoordinate;
@@ -38,7 +39,15 @@ public class Clinic implements Serializable {
             resident.setCurrentPositionOfResident(firstCoordinate, secondCoordinate);
             infectedResidents.add(resident);
             capacityOfClinic--;
-            return true;
+            numberOfPatients++;
+            try {
+                PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
+                patients.println(numberOfPatients);
+                patients.close();
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -51,10 +60,18 @@ public class Clinic implements Serializable {
                 recoveredResidents.add(res);
                 infectedResidents.remove(res);
                 capacityOfClinic++;
+                numberOfPatients--;
                 System.out.println("Stanovnik " + res.getId() + "se oporavio.");
                 //zarazeni se vraca kuci nakon oporavka
                 res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
                         res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+                try {
+                    PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
+                    patients.println(numberOfPatients);
+                    patients.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Optional<ResidentComponent> opt = ComponentsCityDataStore
                         .getInstance()
                         .getResidents()
