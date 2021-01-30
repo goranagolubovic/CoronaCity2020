@@ -2,15 +2,16 @@ package controller;
 
 import components.*;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -84,6 +85,7 @@ public class PageController implements Initializable {
     @FXML
     private Text recoveredPatients;
 
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initMap();
@@ -127,8 +129,9 @@ public class PageController implements Initializable {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
                     //int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
                     int clinicCapacity = 4;
+                    int id = random.nextInt(100);
                     System.out.println("Kapacitet novokreirane klinike je " + clinicCapacity);
-                    Clinic clinic = new Clinic(clinicCapacity, i, j);
+                    Clinic clinic = new Clinic(id,clinicCapacity, i, j);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
@@ -452,18 +455,32 @@ public class PageController implements Initializable {
 
     @FXML
     void reviewStateOfClinics(MouseEvent e) {
+        Scene previousScene=allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clinic_page.fxml"));
-       // PageController pageController = new PageController();
-        //\loader.setController(pageController);
+        StateOfClinicsController stateOfClinicsController=new StateOfClinicsController(previousScene,city);
+        loader.setController(stateOfClinicsController);
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.show();
+
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
+        //new Thread(() -> {
+           // table.setItems((ObservableList<Clinic>) CityDataStore.getInstance().getClinics());
+            String s1="";
+            String s2="";
+            for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
+                s1+="Klinika"+clinic.getID()+"\n";
+                s2+=clinic.getCapacityOfClinic()+"\n";
+            }
+            stateOfClinicsController.setTextNameContent(s1);
+            stateOfClinicsController.setTextCapacityContent(s2);
+        //}
+        //).start();
 
     }
 

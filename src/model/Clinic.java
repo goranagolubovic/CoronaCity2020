@@ -21,10 +21,13 @@ public class Clinic implements Serializable {
 
     private List<Resident> infectedResidents = new ArrayList<>();
     protected PageController.SimulationStopped simulationStopped;
-    public Clinic(int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
+    private int clinicID;
+
+    public Clinic(int clinicID,int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
         this.capacityOfClinic = capacityOfClinic;
         this.firstCoordinate = firstCoordinate;
         this.secondCoordinate = secondCoordinate;
+        this.clinicID=clinicID;
     }
     private  static final Object numberOfInfectedInClinics=new Object();
 
@@ -119,4 +122,7 @@ public class Clinic implements Serializable {
         this.secondCoordinate = secondCoordinate;
     }
 
+    public int getID() {
+        return clinicID;
+    }
 }

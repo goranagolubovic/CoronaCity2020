@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.InnerShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -52,7 +51,7 @@
          <children>
             <VBox alignment="TOP_CENTER" prefHeight="158.0" prefWidth="488.0" GridPane.columnSpan="5">
                <children>
-                  <Text fill="#a1b2ac" strokeType="OUTSIDE" strokeWidth="0.0" text="STANJE U AMBULANTAMA">
+                  <Text fill="#8f826f" strokeType="OUTSIDE" strokeWidth="0.0" text="STANJE U AMBULANTAMA">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>
@@ -61,7 +60,7 @@
             </VBox>
             <VBox alignment="TOP_CENTER" prefHeight="76.0" prefWidth="121.0" GridPane.columnIndex="1" GridPane.rowIndex="21">
                <children>
-                  <ImageView fitHeight="65.0" fitWidth="71.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="65.0" fitWidth="71.0" nodeOrientation="INHERIT" onMouseClicked="#createANewClinic" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@images/create.png" />
                      </image>
@@ -95,13 +94,26 @@
                   <InnerShadow />
                </effect>
             </VBox>
-            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" GridPane.rowSpan="4">
+            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="3" GridPane.rowSpan="16">
                <children>
-                  <ScrollPane prefHeight="382.0" prefWidth="294.0">
-                     <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="280.0" />
-                     </content>
-                  </ScrollPane>
+                  <AnchorPane prefHeight="454.0" prefWidth="218.0" style="-fx-background-color: a7b19b;">
+                     <children>
+                        <VBox alignment="TOP_CENTER" layoutY="27.0" prefHeight="398.0" prefWidth="108.0">
+                           <children>
+                              <Text fx:id="textName" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Text>
+                           </children>
+                        </VBox>
+                        <VBox alignment="TOP_CENTER" layoutX="120.0" layoutY="27.0" prefHeight="398.0" prefWidth="108.0">
+                           <children>
+                              <Text fx:id="textCapacity" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
                </children>
             </VBox>
          </children>
