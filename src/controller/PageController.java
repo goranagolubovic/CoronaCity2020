@@ -3,7 +3,11 @@ package controller;
 import components.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -16,6 +20,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import model.*;
 import util.JavaFXUtil;
 
@@ -77,7 +82,7 @@ public class PageController implements Initializable {
     @FXML
     private Text infectedPatients;
     @FXML
-    private ScrollPane clinicScrollPane;
+    private Text recoveredPatients;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -447,6 +452,18 @@ public class PageController implements Initializable {
 
     @FXML
     void reviewStateOfClinics(MouseEvent e) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clinic_page.fxml"));
+       // PageController pageController = new PageController();
+        //\loader.setController(pageController);
+        try {
+            Parent root = (Parent) loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
 
     }
 
@@ -599,8 +616,10 @@ public class PageController implements Initializable {
                         Path fileName = ev.context();
                         if(fileName.toString().trim().equals("clinic-info.txt")) {
                             List<String> content = Files.readAllLines(dir.resolve(fileName));
-                            for(String s: content)
-                                infectedPatients.setText(s);
+                            if(content.size()>0)
+                                infectedPatients.setText(content.get(0));
+                                if(content.size()>1)
+                                recoveredPatients.setText(content.get(1));
                             //clinicScrollPane.setFitToWidth(true);
                             //Platform.runLater(()-> {
                             //    clinicScrollPane.setContent(infectedPatients);
