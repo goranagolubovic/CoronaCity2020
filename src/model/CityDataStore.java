@@ -17,18 +17,30 @@ public class CityDataStore implements Serializable {
     private List<ControlStation> controlStations;
     private List<Clinic> clinics;
     private int citySize;
+    private List<Resident>infectedResidents;
+
+    public List<Resident> getInfectedResidents() {
+        return infectedResidents;
+    }
+
+    public void setInfectedResidents(List<Resident> infectedResidents) {
+        this.infectedResidents = infectedResidents;
+    }
 
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
         controlStations = new ArrayList<>();
         clinics = new ArrayList<>();
+        infectedResidents=new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
         return (singleton == null) ? (singleton = new CityDataStore()) : singleton;
     }
-
+    public  synchronized  void addInfectedResident(Resident resident){
+        infectedResidents.add(resident);
+    }
     public synchronized void addResident(Resident resident) {
         resident.setId(createResidentID());
         residents.add(resident);

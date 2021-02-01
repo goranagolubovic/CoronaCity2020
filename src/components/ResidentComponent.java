@@ -39,6 +39,7 @@ public abstract class ResidentComponent implements Runnable {
     public static Stack<Alarm> stackOfAlarms = new Stack<Alarm>();
     protected boolean backToHome = false;
     protected final Object lockerInfected = new Object();
+    private final Object lockerAddingToClinics=new Object();
 
     public ResidentComponent(Resident resident) {
         this.resident = resident;
@@ -64,11 +65,10 @@ public abstract class ResidentComponent implements Runnable {
             //Ako je zarazen
             if (checkDistanceOfResidentAndControlStation() && isResidentGetOutOfTheHouse(resident) && resident.getBodyTemperature() > 37.0) { //&& PageController.isThreadRunning
 
-                stackOfAlarms.push(new Alarm(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate(), resident.getHouseID()));
+                stackOfAlarms.push(new Alarm(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate(), resident.getHouseID(),resident));
                 synchronized (PageController.lockerInfectedPerson) {
                     try {
                         PageController.lockerInfectedPerson.wait();
-
                         Rectangle rectangle = (Rectangle) city.getFieldOfMatrix(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate());
                         if (!(rectangle.getUserData() instanceof ControlStation || rectangle.getUserData() instanceof Clinic
                         || rectangle.getUserData() instanceof House)) {
@@ -94,20 +94,6 @@ public abstract class ResidentComponent implements Runnable {
                             });
                             rectangle.setUserData(previousClinic);
                         }
-                        for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize; i++) {
-                            Clinic clinic = clinics.get(i);
-                            if (clinic.addInfectedResident(resident)) {
-
-                                System.out.println("stanovnik " + resident.getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
-                                break;
-                            } else {
-                                if (i == clinicsSize - 1) {
-                                    System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
-                                    // TODO: Napraviti čekanje nove klinike
-                                }
-                            }
-                        }
-
                         synchronized (lockerInfected) {
                             lockerInfected.wait();
                         }

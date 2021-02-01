@@ -19,6 +19,7 @@ public class Clinic implements Serializable {
     public static AtomicInteger numberOfInfected = new AtomicInteger(0);
     public static AtomicInteger numberOfRecovered=new AtomicInteger(0);
 
+
     private List<Resident> infectedResidents = new ArrayList<>();
     protected PageController.SimulationStopped simulationStopped;
     private int clinicID;
@@ -43,6 +44,7 @@ public class Clinic implements Serializable {
         if (capacityOfClinic > 0) {
             resident.setCurrentPositionOfResident(firstCoordinate, secondCoordinate);
             infectedResidents.add(resident);
+            CityDataStore.getInstance().addInfectedResident(resident);
             capacityOfClinic--;
            synchronized (numberOfInfectedInClinics) {
                 numberOfInfected.getAndIncrement();
@@ -62,11 +64,12 @@ public class Clinic implements Serializable {
     public synchronized List<Resident> removeRecoveredResident() {
         List<Resident> recoveredResidents = new ArrayList<>();
         for (int i = 0, infectedResidentsSize = infectedResidents.size(); i < infectedResidentsSize; i++) {
-            Resident res = infectedResidents.get(i);
+            Resident res = infectedResidents.
+                    get(i);
             if (!res.isInfected()) {
                 recoveredResidents.add(res);
-                infectedResidents.remove(res);
                 capacityOfClinic++;
+                infectedResidents.remove(res);
                 synchronized (numberOfInfectedInClinics) {
                     numberOfRecovered.getAndIncrement();
                     try {

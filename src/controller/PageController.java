@@ -41,6 +41,7 @@ public class PageController implements Initializable {
 
 
     private Alarm alarm;
+    private final Object lockerAddingToClinics=new Object();
 
     public class SimulationStopped {
         public boolean isSimulationStopped = false;
@@ -430,11 +431,28 @@ public class PageController implements Initializable {
 //                interruptedException.printStackTrace();
 //            }
 
-            Platform.runLater(() -> {
+            /*Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
-            });
+            });*/  boolean isAdded = false;
+            List<Clinic> clinics = CityDataStore.getInstance().getClinics();
+            for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize && !isAdded; i++) {
+                Clinic clinic = clinics.get(i);
+                for (int j = 0; j < alarms.size() && !isAdded; j++) {
+                    Alarm alarm = alarms.get(j);
+                    if (clinic.addInfectedResident(alarm.getResident())) {
+                        alarms.remove(j);
+                        System.out.println("stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
+                        isAdded = true;
+                    } else {
+                        if (i == clinicsSize - 1) {
+                            System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
+                            // TODO: Napraviti čekanje nove klinike
+                        }
+                    }
+                }
+            }
 
             System.out.println("Poslano");
             synchronized (lockerInfectedPerson) {
@@ -445,7 +463,7 @@ public class PageController implements Initializable {
             }
         });
         thread.start();
-    }
+        }
 
     @FXML
     void stopSimulation(MouseEvent e) {
@@ -515,6 +533,24 @@ public class PageController implements Initializable {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
                 alert.showAndWait();
             });
+        }
+    }
+    @FXML
+    private void showStatistic(MouseEvent e){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/statistic.fxml"));
+        StatisticController statisticController=new StatisticController();
+        loader.setController(statisticController);
+        try {
+            Parent root = (Parent) loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+            //statisticController.addInPieChartNumber();
+            statisticController.addInPieChartType();
+            statisticController.addInPieChartGender();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
         }
     }
 
