@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="700.0" style="-fx-background-color: fde5e1;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainPageController">
+   <children>
+      <AnchorPane layoutX="389.0" layoutY="22.0" prefHeight="368.0" prefWidth="237.0" style="-fx-background-color: b1a09e;">
+         <children>
+            <VBox alignment="TOP_CENTER" focusTraversable="true" layoutX="19.0" layoutY="42.0" spacing="7.0">
+               <children>
+                  <TextField id="1" fx:id="odrasli" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="ODRASLI" style="-fx-background-color: ffffff;" text="3" />
+                  <TextField id="2" fx:id="djeca" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="DJECA" text="7" />
+                  <TextField fx:id="stari" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="STARI" text="3" />
+                  <TextField fx:id="kuce" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ KUĆA" text="10" />
+                  <TextField fx:id="punktovi" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ KONTROLNIH PUNKTOVA" text="5" />
+                  <TextField fx:id="ambulante" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ AMBULANTNIH VOZILA" text="1" />
+               </children>
+            </VBox>
+            <Button fx:id="startButton" alignment="TOP_CENTER" layoutX="93.0" layoutY="328.0" mnemonicParsing="false" onAction="#startSimulation" text="START" />
+         </children>
+      </AnchorPane>
+      <Label layoutX="95.0" layoutY="44.0" prefHeight="50.0" prefWidth="214.0" text="Corona City" textFill="#afb1de">
+         <font>
+            <Font name="Rockwell" size="36.0" />
+         </font>
+      </Label>
+      <ImageView fitHeight="174.0" fitWidth="384.0" layoutY="95.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/coronavirus.jpg" />
+         </image>
+      </ImageView>
+   </children>
+</AnchorPane>

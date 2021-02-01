@@ -14,8 +14,8 @@ public class City implements Serializable {
 
     public City() {
         Random random = new Random();
-        //int randNumber = 15+random.nextInt(15);
-        int randNumber = 15;
+        int randNumber = 15+random.nextInt(15);
+        //int randNumber = 15;
         matrix = new Object[randNumber][randNumber];
         CityDataStore.getInstance().setCitySize(randNumber);
     }

@@ -10,6 +10,7 @@ import javafx.scene.shape.Rectangle;
 import model.*;
 import util.JavaFXUtil;
 
+import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -40,6 +41,7 @@ public abstract class ResidentComponent implements Runnable {
     protected boolean backToHome = false;
     protected final Object lockerInfected = new Object();
     private final Object lockerAddingToClinics=new Object();
+    private DataAboutMovement dataAboutMovement=new DataAboutMovement();
 
     public ResidentComponent(Resident resident) {
         this.resident = resident;
@@ -273,6 +275,10 @@ public abstract class ResidentComponent implements Runnable {
                 newRectangle.setUserData(this);
             }
         }
+        dataAboutMovement.setDirection(direction);
+        dataAboutMovement.setPositionOfResident(resident.getCurrentPositionOfResident());
+        dataAboutMovement.setName(resident.getName());
+        dataAboutMovement.setId(resident.getId());
         return true;
     }
 
@@ -309,6 +315,9 @@ public abstract class ResidentComponent implements Runnable {
         } else
             return Direction.Bottom;
 
+    }
+    public  synchronized DataAboutMovement getDataAboutMovement() {
+        return dataAboutMovement;
     }
 
 

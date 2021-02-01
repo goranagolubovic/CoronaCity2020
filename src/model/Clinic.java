@@ -68,6 +68,7 @@ public class Clinic implements Serializable {
                     get(i);
             if (!res.isInfected()) {
                 recoveredResidents.add(res);
+                CityDataStore.getInstance().addRecoveredResident(res);
                 capacityOfClinic++;
                 infectedResidents.remove(res);
                 synchronized (numberOfInfectedInClinics) {

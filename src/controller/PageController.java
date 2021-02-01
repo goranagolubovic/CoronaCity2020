@@ -85,6 +85,8 @@ public class PageController implements Initializable {
     private Text infectedPatients;
     @FXML
     private Text recoveredPatients;
+    @FXML
+    private ScrollPane scrollPane;
 
 
     @Override
@@ -537,8 +539,9 @@ public class PageController implements Initializable {
     }
     @FXML
     private void showStatistic(MouseEvent e){
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/statistic.fxml"));
-        StatisticController statisticController=new StatisticController();
+        Scene previousScene=allowMovementImageView.getScene();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/statistics.fxml"));
+        StatisticController statisticController=new StatisticController(previousScene);
         loader.setController(statisticController);
         try {
             Parent root = (Parent) loader.load();
@@ -546,7 +549,7 @@ public class PageController implements Initializable {
             Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.show();
-            //statisticController.addInPieChartNumber();
+            statisticController.addInPieChartNumber();
             statisticController.addInPieChartType();
             statisticController.addInPieChartGender();
         } catch (IOException ioException) {
@@ -693,5 +696,7 @@ public class PageController implements Initializable {
 
         }).start();
     }
-
+    public  ScrollPane getScrollPane(){
+        return scrollPane;
+    }
 }

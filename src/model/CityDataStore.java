@@ -18,6 +18,7 @@ public class CityDataStore implements Serializable {
     private List<Clinic> clinics;
     private int citySize;
     private List<Resident>infectedResidents;
+    private List<Resident> recoveredResidents;
 
     public List<Resident> getInfectedResidents() {
         return infectedResidents;
@@ -26,13 +27,14 @@ public class CityDataStore implements Serializable {
     public void setInfectedResidents(List<Resident> infectedResidents) {
         this.infectedResidents = infectedResidents;
     }
-
+    public  void setRecoveredResidents(List<Resident>recoveredResidents){this .recoveredResidents=recoveredResidents;}
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
         controlStations = new ArrayList<>();
         clinics = new ArrayList<>();
         infectedResidents=new ArrayList<>();
+        recoveredResidents=new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
@@ -41,6 +43,7 @@ public class CityDataStore implements Serializable {
     public  synchronized  void addInfectedResident(Resident resident){
         infectedResidents.add(resident);
     }
+    public  synchronized void addRecoveredResident(Resident resident){recoveredResidents.add(resident);}
     public synchronized void addResident(Resident resident) {
         resident.setId(createResidentID());
         residents.add(resident);
@@ -120,5 +123,9 @@ public class CityDataStore implements Serializable {
 
     public void loadData(CityDataStore deserializabledData) {
         singleton = deserializabledData;
+    }
+
+    public List<Resident> getRecoveredResidents() {
+        return recoveredResidents;
     }
 }
