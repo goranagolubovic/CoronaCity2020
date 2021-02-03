@@ -3,15 +3,18 @@ package components;
 
 import controller.DataAboutCoronaCity;
 import controller.PageController;
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import model.*;
 import util.JavaFXUtil;
 
+import javax.naming.Context;
 import javax.xml.crypto.Data;
-import java.io.Serializable;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +45,7 @@ public abstract class ResidentComponent implements Runnable {
     protected final Object lockerInfected = new Object();
     private final Object lockerAddingToClinics=new Object();
     private DataAboutMovement dataAboutMovement=new DataAboutMovement();
-
+    Context context;
     public ResidentComponent(Resident resident) {
         this.resident = resident;
     }
@@ -274,6 +277,37 @@ public abstract class ResidentComponent implements Runnable {
                 JavaFXUtil.runAndWait(() -> newRectangle.setFill(new ImagePattern(getImageOfResident())));
                 newRectangle.setUserData(this);
             }
+        }
+        File file=new File("dataAboutMovement.txt");
+        try{
+            if(!file.exists()){
+                file.createNewFile();
+            }
+
+            FileWriter fileWriter=new FileWriter(file,true);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(resident.getName()+resident.getId()+","+direction+",("+resident.getCurrentPositionOfResident().getFirstCoordinate()
+                    +","+resident.getCurrentPositionOfResident().getSecondCoordinate()+")");
+            bufferedWriter.write("\r\n");
+            bufferedWriter.close();
+
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader br=new BufferedReader(new FileReader("dataAboutMovement.txt"));
+            String content=br.readLine();
+            String s="";
+            while(content!=null) {
+                s+= content+"\r\n";
+                content=br.readLine();
+            }
+            Text text=new Text();
+            text.setText(s);
+            Platform.runLater(()->CityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         dataAboutMovement.setDirection(direction);
         dataAboutMovement.setPositionOfResident(resident.getCurrentPositionOfResident());

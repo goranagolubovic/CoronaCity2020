@@ -28,6 +28,8 @@ import util.JavaFXUtil;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -91,6 +93,8 @@ public class PageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        File file=new File("dataAboutMovement.txt");
+        file.delete();
         initMap();
         initImageViews();
         try {
@@ -360,6 +364,7 @@ public class PageController implements Initializable {
 
     @FXML
     private void allowMovement(MouseEvent e) {
+        CityDataStore.getInstance().setStartTimeOfSimulation(System.currentTimeMillis());
         Thread t2 = new Thread(() -> {
 
             List<ResidentComponent> residentsComponents = ComponentsCityDataStore.getInstance().getResidents();
@@ -469,7 +474,36 @@ public class PageController implements Initializable {
 
     @FXML
     void stopSimulation(MouseEvent e) {
-        System.out.println("Simulacija zavrsena..");
+        CityDataStore.getInstance().setEndTimeOfSimulation(System.currentTimeMillis());
+        PrintWriter endOfSimulation = null;
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH_mm_ss__dd_MM_yyyy");
+        LocalDateTime now = LocalDateTime.now();
+        try {
+            endOfSimulation = new PrintWriter(new BufferedWriter(new FileWriter("SIM-JavaKov-20-"+dtf.format(now)+".txt")));
+            endOfSimulation.println("Trajanje simulacije: "+(CityDataStore.getInstance().getEndTimeOfSimulation()-CityDataStore.getInstance().getStartTimeOfSimulation())/1000+" sekundi");
+            endOfSimulation.println();
+            endOfSimulation.println("Broj kreiranih objekata:");
+            endOfSimulation.println("  -djeca: "+dataAboutCoronaCity.getDjeca());
+            endOfSimulation.println("  -odrasli: "+dataAboutCoronaCity.getOdrasli());
+            endOfSimulation.println("  -stari: "+dataAboutCoronaCity.getStari());
+            endOfSimulation.println("  -kuce: "+dataAboutCoronaCity.getBrojKuca());
+            endOfSimulation.println("  -kontrolni punktovi: "+dataAboutCoronaCity.getKontrolniPunktovi());
+            endOfSimulation.println("  -ambulantna vozila: "+dataAboutCoronaCity.getAmbulantnaVozila());
+            endOfSimulation.println();
+            endOfSimulation.println("Statisticki podaci:");
+            endOfSimulation.println("  Zarazeni: "+CityDataStore.getInstance().getInfectedResidents().size()+" od cega:");
+            endOfSimulation.println("    -djeca: "+CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r->r instanceof Child).collect(Collectors.toList()).size());
+            endOfSimulation.println("    -odrasli: "+CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r->r instanceof Adult).collect(Collectors.toList()).size());
+            endOfSimulation.println("    -stari: "+CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r->r instanceof Elder).collect(Collectors.toList()).size());
+            endOfSimulation.println("  Oporavljeni: "+CityDataStore.getInstance().getRecoveredResidents().size());
+            endOfSimulation.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        System.out.println("Simulacija zavrsena i trajala je "+(CityDataStore.getInstance().getEndTimeOfSimulation()-CityDataStore.getInstance().getStartTimeOfSimulation())/1000);
         System.exit(0);
     }
 
@@ -651,6 +685,9 @@ public class PageController implements Initializable {
             allowMovement(e);
 
         }).start();
+    }
+    public  PageController getPageController(){
+        return this;
     }
     private void detectChangeOfFile(){
         new Thread(()->{

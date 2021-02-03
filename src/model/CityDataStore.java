@@ -1,6 +1,7 @@
 package model;
 
 import components.ResidentComponent;
+import controller.PageController;
 import model.Resident;
 
 import java.io.Serializable;
@@ -19,6 +20,34 @@ public class CityDataStore implements Serializable {
     private int citySize;
     private List<Resident>infectedResidents;
     private List<Resident> recoveredResidents;
+    private PageController pageController;
+    private Long startTimeOfSimulation;
+    private Long endTimeOfSimulation;
+
+    public Long getEndTimeOfSimulation() {
+        return endTimeOfSimulation;
+    }
+
+    public void setEndTimeOfSimulation(Long endTimeOfSimulation) {
+        this.endTimeOfSimulation = endTimeOfSimulation;
+    }
+
+    public Long getStartTimeOfSimulation() {
+        return startTimeOfSimulation;
+    }
+
+    public void setStartTimeOfSimulation(Long startTimeOfSimulation) {
+        this.startTimeOfSimulation = startTimeOfSimulation;
+    }
+
+
+    public PageController getPageController() {
+        return pageController;
+    }
+
+    public void setPageController(PageController pageController) {
+        this.pageController = pageController;
+    }
 
     public List<Resident> getInfectedResidents() {
         return infectedResidents;
@@ -127,5 +156,9 @@ public class CityDataStore implements Serializable {
 
     public List<Resident> getRecoveredResidents() {
         return recoveredResidents;
+    }
+
+    public void addController(PageController controller) {
+        this.pageController=controller;
     }
 }

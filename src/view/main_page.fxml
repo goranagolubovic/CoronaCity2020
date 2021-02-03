@@ -3,6 +3,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Light.Distant?>
+<?import javafx.scene.effect.Lighting?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -23,7 +25,14 @@
                   <TextField fx:id="ambulante" alignment="CENTER" prefHeight="37.0" prefWidth="195.0" promptText="BROJ AMBULANTNIH VOZILA" text="1" />
                </children>
             </VBox>
-            <Button fx:id="startButton" alignment="TOP_CENTER" layoutX="93.0" layoutY="328.0" mnemonicParsing="false" onAction="#startSimulation" text="START" />
+            <Button fx:id="startButton" alignment="TOP_CENTER" layoutX="93.0" layoutY="328.0" mnemonicParsing="false" onAction="#startSimulation" text="START">
+               <effect>
+                  <Lighting bumpInput="$null">
+                     <light>
+                        <Light.Distant color="#f5efef" />
+                     </light>
+                  </Lighting>
+               </effect></Button>
          </children>
       </AnchorPane>
       <Label layoutX="95.0" layoutY="44.0" prefHeight="50.0" prefWidth="214.0" text="Corona City" textFill="#afb1de">
@@ -34,6 +43,11 @@
       <ImageView fitHeight="174.0" fitWidth="384.0" layoutY="95.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@images/coronavirus.jpg" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="coronaVirusRotateImageView" fitHeight="78.0" fitWidth="67.0" layoutX="338.0" layoutY="319.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@images/coronavirusrotate.png" />
          </image>
       </ImageView>
    </children>

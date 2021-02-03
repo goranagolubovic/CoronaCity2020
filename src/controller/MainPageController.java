@@ -1,5 +1,8 @@
 package controller;
 
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,7 +12,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import model.CityDataStore;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,12 +38,15 @@ public class MainPageController implements Initializable {
     private TextField djeca;
     @FXML
     private TextField stari;
+    @FXML
+    private ImageView coronaVirusRotateImageView;
 
     public MainPageController() {
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        startRotate();
     }
 
     @FXML
@@ -68,6 +78,7 @@ public class MainPageController implements Initializable {
         PageController pageController = new PageController(dataAboutCoronaCity);
         loader.setController(pageController);
         Parent root = (Parent) loader.load();
+        CityDataStore.getInstance().addController(loader.getController());
         //proslijedjuje podatke o broju kuca,odraslih,djece...u drugi kontoler...
        /*pageController.setBrojKuca(kuce.getText());
        pageController.setBrojAmbulantnihVozila(ambulante.getText());
@@ -82,4 +93,12 @@ public class MainPageController implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
+    public void startRotate(){
+        RotateTransition rt = new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView);
+        rt.setByAngle(360);
+        rt.setCycleCount(Animation.INDEFINITE);
+        rt.setInterpolator(Interpolator.LINEAR);
+        rt.play();
+    }
+
 }
