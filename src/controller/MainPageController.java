@@ -18,13 +18,19 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import model.CityDataStore;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainPageController implements Initializable {
 
     public Object locker = new Object();
+    public static Handler handler;
     protected static int brojKuca;
     @FXML
     private TextField kuce;
@@ -47,10 +53,25 @@ public class MainPageController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         startRotate();
+        //kreiraj log fajl
+        File logFile=new File("corona_city.log");
+        if(logFile.exists()){
+            logFile.delete();
+        }
+        try {
+            logFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void startSimulation(ActionEvent e) throws IOException {
+
+
+        handler=new FileHandler("corona_city.log",true);
+        Logger.getLogger(MainPageController.class.getName()).addHandler(handler);
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/page.fxml"));
         // TODO: Provjeriti da li su u pitanju sve brojevi (to gledaju oni dosta)
         int kuceNum, punktoviNum, ambulanteNum, odrasliNum, djecaNum, stariNum;
@@ -63,6 +84,7 @@ public class MainPageController implements Initializable {
             djecaNum = Integer.parseInt(djeca.getText());
             stariNum = Integer.parseInt(stari.getText());
         } catch (NumberFormatException ex) {
+            Logger.getLogger(MainPageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
             Alert alert = new Alert(Alert.AlertType.ERROR, "Enter positive integers as values.");
             alert.showAndWait();
             return;

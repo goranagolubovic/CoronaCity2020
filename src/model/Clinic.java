@@ -2,6 +2,7 @@ package model;
 
 import components.ComponentsCityDataStore;
 import components.ResidentComponent;
+import controller.MainPageController;
 import controller.PageController;
 
 import java.io.*;
@@ -10,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Clinic implements Serializable {
     private int capacityOfClinic;
@@ -41,6 +44,7 @@ public class Clinic implements Serializable {
     }
 
     public synchronized boolean addInfectedResident(Resident resident) {
+        Logger.getLogger(Clinic.class.getName()).addHandler(MainPageController.handler);
         if (capacityOfClinic > 0) {
             resident.setCurrentPositionOfResident(firstCoordinate, secondCoordinate);
             infectedResidents.add(resident);
@@ -54,7 +58,7 @@ public class Clinic implements Serializable {
                     patients.close();
                     return true;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
                 }
             }
         }
@@ -62,6 +66,7 @@ public class Clinic implements Serializable {
     }
 
     public synchronized List<Resident> removeRecoveredResident() {
+        Logger.getLogger(Clinic.class.getName()).addHandler(MainPageController.handler);
         List<Resident> recoveredResidents = new ArrayList<>();
         for (int i = 0, infectedResidentsSize = infectedResidents.size(); i < infectedResidentsSize; i++) {
             Resident res = infectedResidents.
@@ -79,7 +84,7 @@ public class Clinic implements Serializable {
                         patients.println(numberOfRecovered);
                         patients.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
                     }
                 }
                 System.out.println("Stanovnik " + res.getId() + "se oporavio.");

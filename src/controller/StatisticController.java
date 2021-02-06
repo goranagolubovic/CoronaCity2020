@@ -18,6 +18,9 @@ import javafx.scene.input.MouseEvent;
 import javax.swing.*;
 import java.io.*;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class StatisticController {
@@ -36,6 +39,8 @@ public class StatisticController {
     private PieChart pieChartType;
     @FXML
     private PieChart pieChartGender;
+
+
     public StatisticController(){
 
     }
@@ -122,7 +127,7 @@ public class StatisticController {
             alert.showAndWait();
             });
         } catch (FileNotFoundException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,fileNotFoundException.fillInStackTrace().toString());
         }
 
     }

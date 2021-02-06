@@ -2,6 +2,7 @@ package components;
 
 
 import controller.DataAboutCoronaCity;
+import controller.MainPageController;
 import controller.PageController;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -17,6 +18,8 @@ import javax.xml.crypto.Data;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 //import static model.City.isFieldOfMatrixFree;
@@ -52,6 +55,7 @@ public abstract class ResidentComponent implements Runnable {
 
     @Override
     public void run() {
+        Logger.getLogger(ResidentComponent.class.getName()).addHandler(MainPageController.handler);
         boolean wait = true;
         List<Clinic> clinics = CityDataStore.getInstance().getClinics();
         while (!simulationStopped.isSimulationStopped) {
@@ -61,7 +65,7 @@ public abstract class ResidentComponent implements Runnable {
                     //Thread.sleep((long) (50 + new Random().nextDouble() * 300));
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e1.fillInStackTrace().toString());
                 }
             }
             List<Resident> recoveredResidents;
@@ -105,7 +109,7 @@ public abstract class ResidentComponent implements Runnable {
 
                         backToHome = false;
                     } catch (InterruptedException ex) {
-                        ex.printStackTrace();
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
                     }
                 }
             }
@@ -130,7 +134,7 @@ public abstract class ResidentComponent implements Runnable {
                         System.out.println("Nastavljeno kretanje od kuce...");
                         backToHome = false;
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
                     }
                 }
             }
@@ -148,6 +152,7 @@ public abstract class ResidentComponent implements Runnable {
     }
 
     public boolean movement() {
+        Logger.getLogger(ResidentComponent.class.getName()).addHandler(MainPageController.handler);
         Direction direction = chooseDirectionOfMovement();
         int firstCoordinate = resident.getCurrentPositionOfResident().getFirstCoordinate();
         int secondCoordinate = resident.getCurrentPositionOfResident().getSecondCoordinate();
@@ -258,7 +263,7 @@ public abstract class ResidentComponent implements Runnable {
                 return true;
                 //simulationStopped.isSimulationStopped=false;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
             }
             return false;
         }
@@ -293,7 +298,7 @@ public abstract class ResidentComponent implements Runnable {
             bufferedWriter.close();
 
         } catch(IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
         }
         try {
             BufferedReader br=new BufferedReader(new FileReader("dataAboutMovement.txt"));
@@ -307,7 +312,7 @@ public abstract class ResidentComponent implements Runnable {
             text.setText(s);
             Platform.runLater(()->CityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
         }
         dataAboutMovement.setDirection(direction);
         dataAboutMovement.setPositionOfResident(resident.getCurrentPositionOfResident());

@@ -33,6 +33,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,9 +94,14 @@ public class PageController implements Initializable {
     @FXML
     private ScrollPane scrollPane;
 
+    public static  Handler handler;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         File file=new File("dataAboutMovement.txt");
         file.delete();
         initMap();
@@ -100,7 +109,7 @@ public class PageController implements Initializable {
         try {
             addHouses(dataAboutCoronaCity.getBrojKuca());
         } catch (NotAdultException | NotElderException | NotChildException e) {
-            e.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
         }
         addControlStation(dataAboutCoronaCity.getKontrolniPunktovi());
         addRectangleToUnusedFieldsOfMatrix();
@@ -114,6 +123,8 @@ public class PageController implements Initializable {
 
     //dodaju se ambulante u matricu grada
     public void initMap() {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         double gridWidth = 500;
         double gridHeight = 500;
 
@@ -165,7 +176,7 @@ public class PageController implements Initializable {
                     try {
                         city.setFieldOfMatrix(rectangle, i, j);
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
                     }
                     map.add(rectangle, i, j);
                 }
@@ -364,6 +375,8 @@ public class PageController implements Initializable {
 
     @FXML
     private void allowMovement(MouseEvent e) {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         CityDataStore.getInstance().setStartTimeOfSimulation(System.currentTimeMillis());
         Thread t2 = new Thread(() -> {
 
@@ -382,7 +395,7 @@ public class PageController implements Initializable {
                 } catch (InterruptedException interruptedException) {
 //                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Failure.");
 //                    alert.show();
-                    interruptedException.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
                 }
             }
 //            Alert alert = new Alert(Alert.AlertType.INFORMATION, "END :D");
@@ -390,11 +403,12 @@ public class PageController implements Initializable {
         });
         t2.start();
         Thread t3 = new Thread(() -> {
+            Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
             while (true) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
                 }
                 while (!ResidentComponent.stackOfAlarms.empty()) {
                     alarm = ResidentComponent.stackOfAlarms.pop();
@@ -410,11 +424,12 @@ public class PageController implements Initializable {
         });
         t3.start();
         Thread thread1 = new Thread(() -> {
+            Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
             while (true) {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
                 }
                 for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
                     clinic.removeRecoveredResident();
@@ -429,6 +444,7 @@ public class PageController implements Initializable {
     @FXML
     private void sendAmbulance(MouseEvent e) {
         Thread thread = new Thread(() -> {
+            Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
 //            try {
 //                synchronized (mapLocker) {
 //
@@ -474,6 +490,8 @@ public class PageController implements Initializable {
 
     @FXML
     void stopSimulation(MouseEvent e) {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         CityDataStore.getInstance().setEndTimeOfSimulation(System.currentTimeMillis());
         PrintWriter endOfSimulation = null;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH_mm_ss__dd_MM_yyyy");
@@ -501,7 +519,7 @@ public class PageController implements Initializable {
             endOfSimulation.println("  Oporavljeni: "+CityDataStore.getInstance().getRecoveredResidents().size());
             endOfSimulation.close();
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
         }
         System.out.println("Simulacija zavrsena i trajala je "+(CityDataStore.getInstance().getEndTimeOfSimulation()-CityDataStore.getInstance().getStartTimeOfSimulation())/1000);
         System.exit(0);
@@ -509,6 +527,8 @@ public class PageController implements Initializable {
 
     @FXML
     void reviewStateOfClinics(MouseEvent e) {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         Scene previousScene=allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clinic_page.fxml"));
         StateOfClinicsController stateOfClinicsController=new StateOfClinicsController(previousScene,city);
@@ -521,7 +541,7 @@ public class PageController implements Initializable {
             stage.show();
 
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
         }
         //new Thread(() -> {
            // table.setItems((ObservableList<Clinic>) CityDataStore.getInstance().getClinics());
@@ -540,11 +560,12 @@ public class PageController implements Initializable {
 
     @FXML
     void pauseSimulation(MouseEvent e) {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
         simulationStopped.isSimulationStopped = true;
         try {
             Thread.sleep(2000);
         } catch (InterruptedException interruptedException) {
-            interruptedException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
         }
         File file = new File("states");
         file.mkdirs();
@@ -557,14 +578,14 @@ public class PageController implements Initializable {
                     alert.showAndWait();
                 });
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
                     alert.showAndWait();
                 });
             }
         } catch (IOException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,fileNotFoundException.fillInStackTrace().toString());
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
                 alert.showAndWait();
@@ -573,6 +594,8 @@ public class PageController implements Initializable {
     }
     @FXML
     private void showStatistic(MouseEvent e){
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+
         Scene previousScene=allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/statistics.fxml"));
         StatisticController statisticController=new StatisticController(previousScene);
@@ -587,19 +610,20 @@ public class PageController implements Initializable {
             statisticController.addInPieChartType();
             statisticController.addInPieChartGender();
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
         }
     }
 
     void startSimulationAgain(MouseEvent e) {
+        Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
         System.out.println("start sim again.");
         new Thread(() -> {
-
+            Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
             simulationStopped.isSimulationStopped = true;
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
             }
             FileChooser.ExtensionFilter serFilter
                     = new FileChooser.ExtensionFilter("Serializabled files", "*.ser");
@@ -620,21 +644,21 @@ public class PageController implements Initializable {
                     try {
                         CityDataStore.getInstance().loadData((CityDataStore) ois.readObject());
                     } catch (ClassNotFoundException classNotFoundException) {
-                        classNotFoundException.printStackTrace();
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,classNotFoundException.fillInStackTrace().toString());
                     }
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Kretanje nastavljeno i izvrsena deserijalizacija.");
                         alert.showAndWait();
                     });
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
                         alert.showAndWait();
                     });
                 }
             } catch (IOException fileNotFoundException) {
-                fileNotFoundException.printStackTrace();
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,fileNotFoundException.fillInStackTrace().toString());
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
                     alert.showAndWait();
@@ -691,6 +715,7 @@ public class PageController implements Initializable {
     }
     private void detectChangeOfFile(){
         new Thread(()->{
+            Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
             WatchService watcher = null;
             try {
                 watcher = FileSystems.getDefault().newWatchService();
@@ -701,6 +726,7 @@ public class PageController implements Initializable {
                     try {
                         key = watcher.take();
                     } catch (InterruptedException ex) {
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
                         return;
                     }
 
@@ -728,7 +754,7 @@ public class PageController implements Initializable {
 
             }
             catch (IOException e) {
-                e.printStackTrace();
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
             }
 
         }).start();
