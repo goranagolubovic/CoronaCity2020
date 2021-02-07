@@ -71,14 +71,22 @@ public abstract class ResidentComponent implements Runnable {
             List<Resident> recoveredResidents;
 
             wait = movement();
+            //Ako je jos u kuci pauziraj  1s
+            if(!isResidentGetOutOfTheHouse(resident)){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Logger.getLogger(ResidentComponent.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                }
+            }
             //Ako je zarazen
             if (checkDistanceOfResidentAndControlStation() && isResidentGetOutOfTheHouse(resident) && resident.getBodyTemperature() > 37.0) { //&& PageController.isThreadRunning
 
                 stackOfAlarms.push(new Alarm(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate(), resident.getHouseID(),resident));
                 synchronized (PageController.lockerInfectedPerson) {
                     try {
-                        PageController.lockerInfectedPerson.wait();
                         Rectangle rectangle = (Rectangle) city.getFieldOfMatrix(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate());
+                        PageController.lockerInfectedPerson.wait();
                         if (!(rectangle.getUserData() instanceof ControlStation || rectangle.getUserData() instanceof Clinic
                         || rectangle.getUserData() instanceof House)) {
                             rectangle.setUserData(null);
@@ -189,14 +197,14 @@ public abstract class ResidentComponent implements Runnable {
                 case Bottom -> secondCoordinate++;
             }
         }
+        synchronized (locker) {
+                if (!checkDistance(firstCoordinate, secondCoordinate,resident)) {
+                    return true;
+                }
+        }
         nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
         nextRectangle = (Rectangle) nextField;
         nextFieldContent = nextRectangle.getUserData();
-        synchronized (locker) {
-            if (!checkDistance(firstCoordinate, secondCoordinate)) {
-                return false;
-            }
-        }
         if (nextFieldContent instanceof Resident) {
             return false;
         }
@@ -280,7 +288,7 @@ public abstract class ResidentComponent implements Runnable {
                 JavaFXUtil.runAndWait(() -> newRectangle.setFill(new ImagePattern(getImageOfResidentWithHouse())));
             } else {
                 JavaFXUtil.runAndWait(() -> newRectangle.setFill(new ImagePattern(getImageOfResident())));
-                newRectangle.setUserData(this);
+                newRectangle.setUserData(resident);
             }
         }
         File file=new File("dataAboutMovement.txt");
@@ -310,7 +318,7 @@ public abstract class ResidentComponent implements Runnable {
             }
             Text text=new Text();
             text.setText(s);
-            Platform.runLater(()->CityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
+            Platform.runLater(()->ComponentsCityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
         } catch (IOException e) {
             Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
         }
@@ -423,7 +431,7 @@ public abstract class ResidentComponent implements Runnable {
 
     public abstract Image getImageOfResidentWithHouse();
 
-    public abstract boolean checkDistance(int firstCoordinate, int secondCoordinate);
+    public abstract boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident);
 
     // Setters and getters
     public void setDataAboutCoronaCity(DataAboutCoronaCity dataAboutCoronaCity) {

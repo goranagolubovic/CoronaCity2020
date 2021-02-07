@@ -1,5 +1,6 @@
 package controller;
 
+import components.ComponentsCityDataStore;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
@@ -73,7 +74,6 @@ public class MainPageController implements Initializable {
         Logger.getLogger(MainPageController.class.getName()).addHandler(handler);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/page.fxml"));
-        // TODO: Provjeriti da li su u pitanju sve brojevi (to gledaju oni dosta)
         int kuceNum, punktoviNum, ambulanteNum, odrasliNum, djecaNum, stariNum;
         kuceNum = punktoviNum = ambulanteNum = odrasliNum = djecaNum = stariNum = 0;
         try {
@@ -100,7 +100,7 @@ public class MainPageController implements Initializable {
         PageController pageController = new PageController(dataAboutCoronaCity);
         loader.setController(pageController);
         Parent root = (Parent) loader.load();
-        CityDataStore.getInstance().addController(loader.getController());
+        ComponentsCityDataStore.getInstance().addController(loader.getController());
         //proslijedjuje podatke o broju kuca,odraslih,djece...u drugi kontoler...
        /*pageController.setBrojKuca(kuce.getText());
        pageController.setBrojAmbulantnihVozila(ambulante.getText());

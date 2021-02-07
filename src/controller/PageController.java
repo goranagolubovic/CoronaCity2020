@@ -213,7 +213,7 @@ public class PageController implements Initializable {
             PositionOfResident freePosition = freePositions.get(freeIndex);
             int iPosition = freePosition.getFirstCoordinate();
             int jPosition = freePosition.getSecondCoordinate();
-            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition, jPosition, 0, House.class)) {
+            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition, jPosition, null,0, House.class)) {
                 freePositions.remove(freeIndex);
                 House house = new House(null);
                 CityDataStore.getInstance().addHouse(house);
@@ -536,7 +536,8 @@ public class PageController implements Initializable {
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            Stage stage=new Stage();
             stage.setScene(scene);
             stage.show();
 
@@ -603,7 +604,8 @@ public class PageController implements Initializable {
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            Stage stage=new Stage();
             stage.setScene(scene);
             stage.show();
             statisticController.addInPieChartNumber();
@@ -670,12 +672,35 @@ public class PageController implements Initializable {
                     .stream()
                     .map(Resident::mapToComponent)
                     .collect(Collectors.toList()));
+            double gridWidth = 500;
+            double gridHeight = 500;
+
+            city.setCitySize(CityDataStore.getInstance().getCitySize());
+            city.setMatrix(CityDataStore.getInstance().getCitySize());
+
+            double cellHeight = gridHeight / city.getMatrix().length;
+            double cellWidth = gridWidth / city.getMatrix().length;
+
+            map.getColumnConstraints().clear();
+            map.getRowConstraints().clear();
+            Platform.runLater(()->map.getChildren().clear());
 
             for (int i = 0; i < city.getMatrix().length; i++) {
-                for (int j = 0; j < city.getMatrix().length; j++) {
-                    Rectangle rect = (Rectangle) city.getMatrix()[i][j];
+                map.getColumnConstraints().add(new ColumnConstraints(cellWidth));
+                map.getRowConstraints().add(new RowConstraints(cellHeight));
+            }
+
+            for (int i = 0; i < CityDataStore.getInstance().getCitySize(); i++) {
+                for (int j = 0; j < CityDataStore.getInstance().getCitySize(); j++) {
+                    Rectangle rect=new Rectangle(cellHeight,cellWidth);
+                    //Rectangle rect = (Rectangle) city.getMatrix()[i][j];
+                    rect.getStyleClass().add("rectangle-map");
                     JavaFXUtil.runAndWait(() -> rect.setFill(Color.rgb(238, 229, 222)));
                     rect.setUserData(null);
+                    city.setFieldOfMatrix(rect,i,j);
+                    int finalI = i;
+                    int finalJ = j;
+                    Platform.runLater(() -> map.add(rect, finalI, finalJ));
                 }
             }
             for (var residentComponent : ComponentsCityDataStore.getInstance().getResidents()) {

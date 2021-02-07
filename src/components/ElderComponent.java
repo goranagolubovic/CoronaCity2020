@@ -50,8 +50,8 @@ public class ElderComponent extends ResidentComponent {
     }
 
     @Override
-    public boolean checkDistance(int firstCoordinate, int secondCoordinate) {
-        return city.checkDistanceOfField(firstCoordinate, secondCoordinate, 1, Elder.class, Adult.class);
+    public boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident) {
+        return city.checkDistanceOfField(firstCoordinate, secondCoordinate,resident, 0, Elder.class, Adult.class, ElderComponent.class, AdultComponent.class);
     }
 
 

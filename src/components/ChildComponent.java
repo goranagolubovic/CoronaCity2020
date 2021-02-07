@@ -48,7 +48,7 @@ public class ChildComponent extends ResidentComponent {
     }
 
     @Override
-    public boolean checkDistance(int firstCoordinate, int secondCoordinate) {
+    public boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident) {
         return true;
     }
 

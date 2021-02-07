@@ -12,12 +12,25 @@ import java.util.Random;
 public class City implements Serializable {
     private Object[][] matrix;
 
+    public int getCitySize() {
+        return citySize;
+    }
+
+    public void setCitySize(int citySize) {
+        this.citySize = citySize;
+    }
+
+    private int citySize;
     public City() {
         Random random = new Random();
         int randNumber = 15+random.nextInt(15);
-        //int randNumber = 15;
+       // int randNumber = 5;
+        CityDataStore.getInstance().setCitySize(randNumber);
         matrix = new Object[randNumber][randNumber];
         CityDataStore.getInstance().setCitySize(randNumber);
+    }
+    public City(int citySize){
+        matrix=new Object[citySize][citySize];
     }
 
     public Object[][] getMatrix() {
@@ -32,25 +45,49 @@ public class City implements Serializable {
         matrix[i][j] = o;
     }
 
-    public boolean checkDistanceOfField(int firstCoordinate, int secondCoordinate, int criterium, Class... classTypes) {
+    public synchronized boolean checkDistanceOfField(int firstCoordinate, int secondCoordinate, Resident resident, int criterium, Class... classTypes) {
+        long start = System.currentTimeMillis();
         int counter = 0;
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {
-                if (firstCoordinate + i >= 0 && firstCoordinate + i < matrix.length &&
-                        secondCoordinate + j >= 0 && secondCoordinate + j < matrix.length) {
-                    Object obj = matrix[firstCoordinate + i][secondCoordinate + j];
-                    if(obj!=null) {
-                        Rectangle rectangle = (Rectangle) matrix[firstCoordinate + i][secondCoordinate + j];
+                if (firstCoordinate + i >= 0 && firstCoordinate + i < getMatrix().length &&
+                        secondCoordinate + j >= 0 && secondCoordinate + j < getMatrix().length) {
+                    Object obj = getFieldOfMatrix(firstCoordinate + i,secondCoordinate + j);
+                    if (obj != null) {
+                        Rectangle rectangle = (Rectangle) getFieldOfMatrix(firstCoordinate + i,secondCoordinate + j);
                         Object content = rectangle.getUserData();
                         if (content != null) {
-                            if (Arrays.stream(classTypes).anyMatch(cl -> cl.isInstance(content))) {
-                                counter++;
+                            if (resident != null) {
+                                if (content instanceof Resident && !(content instanceof Child)) {
+                                    Resident r = (Resident) content;
+                                    if (!areResidentsHouseInmate(r, resident)) {
+                                        if (Arrays.stream(classTypes).anyMatch(cl -> cl.isInstance(content))) {
+                                            counter++;
+                                        }
+                                    }
+                                }
+                            }else{
+                                if (Arrays.stream(classTypes).anyMatch(cl -> cl.isInstance(content))) {
+                                    counter++;
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Time: "+(end-start));
+        System.out.println(counter);
         return counter <= criterium;
+    }
+
+    private boolean areResidentsHouseInmate(Resident r, Resident resident) {
+        System.out.println("Inmate: "+(resident.getHouseID() == r.getHouseID()));
+        return (resident.getHouseID() == r.getHouseID());
+    }
+
+    public void setMatrix(int size) {
+        matrix=new Object[size][size];
     }
 }
