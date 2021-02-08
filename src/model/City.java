@@ -46,7 +46,6 @@ public class City implements Serializable {
     }
 
     public synchronized boolean checkDistanceOfField(int firstCoordinate, int secondCoordinate, Resident resident, int criterium, Class... classTypes) {
-        long start = System.currentTimeMillis();
         int counter = 0;
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {
@@ -76,14 +75,10 @@ public class City implements Serializable {
                 }
             }
         }
-        long end = System.currentTimeMillis();
-        System.out.println("Time: "+(end-start));
-        System.out.println(counter);
         return counter <= criterium;
     }
 
     private boolean areResidentsHouseInmate(Resident r, Resident resident) {
-        System.out.println("Inmate: "+(resident.getHouseID() == r.getHouseID()));
         return (resident.getHouseID() == r.getHouseID());
     }
 

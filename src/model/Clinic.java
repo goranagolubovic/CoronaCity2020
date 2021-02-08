@@ -68,40 +68,45 @@ public class Clinic implements Serializable {
     public synchronized List<Resident> removeRecoveredResident() {
         Logger.getLogger(Clinic.class.getName()).addHandler(MainPageController.handler);
         List<Resident> recoveredResidents = new ArrayList<>();
-        for (int i = 0, infectedResidentsSize = infectedResidents.size(); i < infectedResidentsSize; i++) {
-            Resident res = infectedResidents.
-                    get(i);
-            if (!res.isInfected()) {
-                recoveredResidents.add(res);
-                CityDataStore.getInstance().addRecoveredResident(res);
-                capacityOfClinic++;
-                infectedResidents.remove(res);
-                synchronized (numberOfInfectedInClinics) {
-                    numberOfRecovered.getAndIncrement();
-                    try {
-                        PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
-                        patients.println(numberOfInfected);
-                        patients.println(numberOfRecovered);
-                        patients.close();
-                    } catch (IOException e) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+        for (int i = 0 ; i < infectedResidents.size(); i++) {
+            try {
+                Resident res = infectedResidents.
+                        get(i);
+                if (!res.isInfected()) {
+                    recoveredResidents.add(res);
+                    CityDataStore.getInstance().addRecoveredResident(res);
+                    capacityOfClinic++;
+                    infectedResidents.remove(res);
+                    synchronized (numberOfInfectedInClinics) {
+                        numberOfRecovered.getAndIncrement();
+                        try {
+                            PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
+                            patients.println(numberOfInfected);
+                            patients.println(numberOfRecovered);
+                            patients.close();
+                        } catch (IOException e) {
+                            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
+                        }
+                    }
+                    System.out.println("Stanovnik " + res.getId() + "se oporavio.");
+                    //zarazeni se vraca kuci nakon oporavka
+                    res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
+                            res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+                    Optional<ResidentComponent> opt = ComponentsCityDataStore
+                            .getInstance()
+                            .getResidents()
+                            .stream()
+                            .filter(r -> res.getId() == r.getResident().getId())
+                            .findFirst();
+                    if (opt.isPresent()) {
+                        synchronized (opt.get().getLockerInfected()) {
+                            opt.get().getLockerInfected().notifyAll();
+                        }
                     }
                 }
-                System.out.println("Stanovnik " + res.getId() + "se oporavio.");
-                //zarazeni se vraca kuci nakon oporavka
-                res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
-                        res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
-                Optional<ResidentComponent> opt = ComponentsCityDataStore
-                        .getInstance()
-                        .getResidents()
-                        .stream()
-                        .filter(r -> res.getId() == r.getResident().getId())
-                        .findFirst();
-                if (opt.isPresent()) {
-                    synchronized (opt.get().getLockerInfected()) {
-                        opt.get().getLockerInfected().notifyAll();
-                    }
-                }
+            }
+            catch (IndexOutOfBoundsException e){
+                Logger.getLogger(Clinic.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
             }
         }
         return recoveredResidents;

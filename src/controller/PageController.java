@@ -93,6 +93,8 @@ public class PageController implements Initializable {
     private Text recoveredPatients;
     @FXML
     private ScrollPane scrollPane;
+    @FXML
+    private ScrollPane notificationScrollPane;
 
     public static  Handler handler;
 
@@ -102,8 +104,10 @@ public class PageController implements Initializable {
 
         Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
 
-        File file=new File("dataAboutMovement.txt");
-        file.delete();
+        File file1=new File("dataAboutMovement.txt");
+        file1.delete();
+        File file2=new File("userNotifications.txt");
+        file2.delete();
         initMap();
         initImageViews();
         try {
@@ -113,6 +117,9 @@ public class PageController implements Initializable {
         }
         addControlStation(dataAboutCoronaCity.getKontrolniPunktovi());
         addRectangleToUnusedFieldsOfMatrix();
+        for(int i=0;i<dataAboutCoronaCity.getAmbulantnaVozila();i++){
+            CityDataStore.getInstance().getAmbulances().add(new Ambulance());
+        }
     }
 
     private void initImageViews() {
@@ -413,11 +420,41 @@ public class PageController implements Initializable {
                 while (!ResidentComponent.stackOfAlarms.empty()) {
                     alarm = ResidentComponent.stackOfAlarms.pop();
                     alarms.add(alarm);
-                    Platform.runLater(() -> {
+                    File file=new File("userNotifications.txt");
+                    try{
+                        if(!file.exists()){
+                            file.createNewFile();
+                        }
+
+                        FileWriter fileWriter=new FileWriter(file,true);
+
+                        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                        bufferedWriter.write("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
+                        bufferedWriter.write("\r\n");
+                        bufferedWriter.close();
+
+                    } catch(IOException ex) {
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                    }
+                    try {
+                        BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
+                        String content=br.readLine();
+                        String s="";
+                        while(content!=null) {
+                            s+= content+"\r\n";
+                            content=br.readLine();
+                        }
+                        Text text=new Text();
+                        text.setText(s);
+                        Platform.runLater(()->notificationScrollPane.setContent(text));
+                    } catch (IOException exception) {
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                    }
+                   /* Platform.runLater(() -> {
                         Alert a = new Alert(Alert.AlertType.INFORMATION);
                         a.setContentText("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
                         a.show();
-                    });
+                    });*/
 
                 }
             }
@@ -458,26 +495,102 @@ public class PageController implements Initializable {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
-            });*/  boolean isAdded = false;
-            List<Clinic> clinics = CityDataStore.getInstance().getClinics();
-            for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize && !isAdded; i++) {
-                Clinic clinic = clinics.get(i);
-                for (int j = 0; j < alarms.size() && !isAdded; j++) {
-                    Alarm alarm = alarms.get(j);
-                    if (clinic.addInfectedResident(alarm.getResident())) {
-                        alarms.remove(j);
-                        System.out.println("stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
-                        isAdded = true;
-                    } else {
-                        if (i == clinicsSize - 1) {
-                            System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
-                            // TODO: Napraviti čekanje nove klinike
+
+            });*/
+            boolean isAdded = false;
+            for (int a = 0, size = CityDataStore.getInstance().getAmbulances().size(); a < size && !isAdded; a++) {
+                if (CityDataStore.getInstance().getAmbulances().get(a).getAmbulanceFree()) {
+                    List<Clinic> clinics = CityDataStore.getInstance().getClinics();
+                    for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize && !isAdded; i++) {
+                        Clinic clinic = clinics.get(i);
+                        for (int j = 0; j < alarms.size() && !isAdded; j++) {
+                            Alarm alarm = alarms.get(j);
+                            if (clinic.addInfectedResident(alarm.getResident())) {
+                                CityDataStore.getInstance().getAmbulances().get(a).setAmbulanceFree(false);
+                                isAdded = true;
+                                alarms.remove(j);
+                                File file=new File("userNotifications.txt");
+                                try{
+                                    if(!file.exists()){
+                                        file.createNewFile();
+                                    }
+
+                                    FileWriter fileWriter=new FileWriter(file,true);
+
+                                    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                                    bufferedWriter.write("Ambulantno vozilo poslano i stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
+                                    bufferedWriter.write("\r\n");
+                                    bufferedWriter.close();
+
+                                } catch(IOException ex) {
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                                }
+                                try {
+                                    BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
+                                    String content=br.readLine();
+                                    String s="";
+                                    while(content!=null) {
+                                        s+= content+"\r\n";
+                                        content=br.readLine();
+                                    }
+                                    Text text=new Text();
+                                    text.setText(s);
+                                    Platform.runLater(()->notificationScrollPane.setContent(text));
+                                } catch (IOException exception) {
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                                }
+                                //System.out.println("Poslano");
+                                //System.out.println("stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
+                                Random random=new Random();
+                                try {
+                                    Thread.sleep(random.nextInt(5000));
+                                } catch (InterruptedException interruptedException) {
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                                }
+                                CityDataStore.getInstance().getAmbulances().get(a).setAmbulanceFree(true);
+                            } else {
+                                if (i == clinicsSize - 1) {
+                                    System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
+                                    // TODO: Napraviti čekanje nove klinike
+                                }
+                            }
                         }
                     }
                 }
             }
+            if(!isAdded) {
+                File file=new File("userNotifications.txt");
+                try{
+                    if(!file.exists()){
+                        file.createNewFile();
+                    }
 
-            System.out.println("Poslano");
+                    FileWriter fileWriter=new FileWriter(file,true);
+
+                    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                    bufferedWriter.write("Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...");
+                    bufferedWriter.write("\r\n");
+                    bufferedWriter.close();
+
+                } catch(IOException ex) {
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                }
+                try {
+                    BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
+                    String content=br.readLine();
+                    String s="";
+                    while(content!=null) {
+                        s+= content+"\r\n";
+                        content=br.readLine();
+                    }
+                    Text text=new Text();
+                    text.setText(s);
+                    Platform.runLater(()->notificationScrollPane.setContent(text));
+                } catch (IOException exception) {
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                }
+                //System.out.println("Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...");
+            }
             synchronized (lockerInfectedPerson) {
                 synchronized (lockerThreadRunning) {
                     //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
@@ -606,6 +719,7 @@ public class PageController implements Initializable {
             Scene scene = new Scene(root);
             //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
             Stage stage=new Stage();
+            stage.setTitle("Corona City-statistic");
             stage.setScene(scene);
             stage.show();
             statisticController.addInPieChartNumber();

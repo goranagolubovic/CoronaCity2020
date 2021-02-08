@@ -39,7 +39,6 @@ public class FXMain extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        primaryStage.initStyle(StageStyle.UNDECORATED);
         Scene scene1 = new Scene(root);
         primaryStage.setScene(scene1);
         primaryStage.setResizable(false);

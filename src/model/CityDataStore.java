@@ -20,6 +20,8 @@ public class CityDataStore implements Serializable {
     private int citySize;
     private List<Resident>infectedResidents;
     private List<Resident> recoveredResidents;
+
+    private List<Ambulance>ambulances;
     private Long startTimeOfSimulation;
     private Long endTimeOfSimulation;
 
@@ -38,7 +40,13 @@ public class CityDataStore implements Serializable {
     public void setStartTimeOfSimulation(Long startTimeOfSimulation) {
         this.startTimeOfSimulation = startTimeOfSimulation;
     }
+    public List<Ambulance> getAmbulances() {
+        return ambulances;
+    }
 
+    public void setAmbulances(List<Ambulance> ambulances) {
+        this.ambulances = ambulances;
+    }
 
     public List<Resident> getInfectedResidents() {
         return infectedResidents;
@@ -55,6 +63,7 @@ public class CityDataStore implements Serializable {
         clinics = new ArrayList<>();
         infectedResidents=new ArrayList<>();
         recoveredResidents=new ArrayList<>();
+        ambulances=new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
@@ -82,7 +91,12 @@ public class CityDataStore implements Serializable {
         clinics.add(clinic);
     }
 
-
+    public synchronized  void addAmbulance(Ambulance ambulance){
+        ambulances.add(ambulance);
+    }
+    public synchronized void removeAmbulance(Ambulance ambulance){
+        ambulances.remove(ambulance);
+    }
     private Long createResidentID() {
         Optional<Resident> optionalResident = residents.stream().max((a, b) -> (int) (a.getId() - b.getId()));
         //ako postoji maksimum
