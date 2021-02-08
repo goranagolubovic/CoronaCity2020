@@ -1,0 +1,4 @@
+Posaljite ambulantu na poziciju (25,13).
+Ambulantno vozilo poslano i stanovnik 3 je dodan u kliniku 3
+Posaljite ambulantu na poziciju (14,6).
+Ambulantno vozilo poslano i stanovnik 5 je dodan u kliniku 3

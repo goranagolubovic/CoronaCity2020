@@ -22,6 +22,8 @@ import model.CityDataStore;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -46,7 +48,13 @@ public class MainPageController implements Initializable {
     @FXML
     private TextField stari;
     @FXML
-    private ImageView coronaVirusRotateImageView;
+    private ImageView coronaVirusRotateImageView1;
+    @FXML
+    private ImageView coronaVirusRotateImageView2;
+    @FXML
+    private ImageView coronaVirusRotateImageView3;
+    @FXML
+    private ImageView coronaVirusRotateImageView4;
 
     public MainPageController() {
     }
@@ -115,12 +123,18 @@ public class MainPageController implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
-    public void startRotate(){
-        RotateTransition rt = new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView);
-        rt.setByAngle(360);
-        rt.setCycleCount(Animation.INDEFINITE);
-        rt.setInterpolator(Interpolator.LINEAR);
-        rt.play();
+    public void startRotate() {
+        List<RotateTransition> rotateTransitions = new ArrayList<>();
+        rotateTransitions.add(new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView1));
+        rotateTransitions.add(new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView2));
+        rotateTransitions.add(new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView3));
+        rotateTransitions.add(new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView4));
+        for (RotateTransition rt : rotateTransitions) {
+            rt.setByAngle(360);
+            rt.setCycleCount(Animation.INDEFINITE);
+            rt.setInterpolator(Interpolator.LINEAR);
+            rt.play();
+        }
     }
 
 }
