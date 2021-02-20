@@ -47,7 +47,7 @@ public class PageController implements Initializable {
 
 
     private Alarm alarm;
-    private final Object lockerAddingToClinics=new Object();
+    private final Object lockerAddingToClinics = new Object();
 
     public class SimulationStopped {
         public boolean isSimulationStopped = false;
@@ -96,7 +96,7 @@ public class PageController implements Initializable {
     @FXML
     private ScrollPane notificationScrollPane;
 
-    public static  Handler handler;
+    public static Handler handler;
 
 
     @Override
@@ -104,20 +104,20 @@ public class PageController implements Initializable {
 
         Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
 
-        File file1=new File("dataAboutMovement.txt");
+        File file1 = new File("dataAboutMovement.txt");
         file1.delete();
-        File file2=new File("userNotifications.txt");
+        File file2 = new File("userNotifications.txt");
         file2.delete();
         initMap();
         initImageViews();
         try {
             addHouses(dataAboutCoronaCity.getBrojKuca());
         } catch (NotAdultException | NotElderException | NotChildException e) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
         }
         addControlStation(dataAboutCoronaCity.getKontrolniPunktovi());
         addRectangleToUnusedFieldsOfMatrix();
-        for(int i=0;i<dataAboutCoronaCity.getAmbulantnaVozila();i++){
+        for (int i = 0; i < dataAboutCoronaCity.getAmbulantnaVozila(); i++) {
             CityDataStore.getInstance().getAmbulances().add(new Ambulance());
         }
     }
@@ -156,7 +156,7 @@ public class PageController implements Initializable {
                     int clinicCapacity = 4;
                     int id = random.nextInt(100);
                     System.out.println("Kapacitet novokreirane klinike je " + clinicCapacity);
-                    Clinic clinic = new Clinic(id,clinicCapacity, i, j);
+                    Clinic clinic = new Clinic(id, clinicCapacity, i, j);
                     rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
@@ -165,7 +165,7 @@ public class PageController implements Initializable {
                     int finalJ = j;
                     rectangle.setOnMouseClicked(event -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name" );
+                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name");
                         content.append(System.lineSeparator());
                         List<Resident> residents = CityDataStore.getInstance()
                                 .getResidents()
@@ -183,7 +183,7 @@ public class PageController implements Initializable {
                     try {
                         city.setFieldOfMatrix(rectangle, i, j);
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
                     }
                     map.add(rectangle, i, j);
                 }
@@ -212,15 +212,15 @@ public class PageController implements Initializable {
         }
         while (br != numberOfHouses) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-            rectangle.getStyleClass().add("rectangle-map");
             rectangle.setFill(Color.rgb(238, 229, 222));
+            rectangle.getStyleClass().add("rectangle-map");
             //House house=new House((long)br);
 
             int freeIndex = r.nextInt(freePositions.size() - 1);
             PositionOfResident freePosition = freePositions.get(freeIndex);
             int iPosition = freePosition.getFirstCoordinate();
             int jPosition = freePosition.getSecondCoordinate();
-            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition, jPosition, null,0, House.class)) {
+            if ((Rectangle) city.getFieldOfMatrix(iPosition, jPosition) == null && city.checkDistanceOfField(iPosition, jPosition, null, 0, House.class)) {
                 freePositions.remove(freeIndex);
                 House house = new House(null);
                 CityDataStore.getInstance().addHouse(house);
@@ -232,7 +232,7 @@ public class PageController implements Initializable {
                 house.setSecondCoordinateOfHouse(jPosition);
                 rectangle.setOnMouseClicked(event -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    StringBuilder content = new StringBuilder("x=" + house.getFirstCoordinateOfHouse() + ", y=" + house.getSecondCoordinateOfHouse() + ", name" );
+                    StringBuilder content = new StringBuilder("x=" + house.getFirstCoordinateOfHouse() + ", y=" + house.getSecondCoordinateOfHouse() + ", name");
                     content.append(System.lineSeparator());
                     List<Resident> residents = CityDataStore.getInstance()
                             .getResidents()
@@ -311,8 +311,8 @@ public class PageController implements Initializable {
         //List<ControlStation>controlStations=CityDataStore.getInstance().getControlStations();
         while (br != controls) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-            rectangle.getStyleClass().add("rectangle-map");
             rectangle.setFill(Color.rgb(238, 229, 222));
+            rectangle.getStyleClass().add("rectangle-map");
             ControlStation controlStation = new ControlStation();
             int iPosition = r.nextInt(city.getMatrix().length - 1);
             int jPosition = r.nextInt(city.getMatrix().length - 1);
@@ -340,13 +340,13 @@ public class PageController implements Initializable {
             for (int j = 0; j < city.getMatrix().length; j++) {
                 if ((Rectangle) city.getFieldOfMatrix(i, j) == null) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-                    rectangle.getStyleClass().add("rectangle-map");
                     rectangle.setFill(Color.rgb(238, 229, 222));
+                    rectangle.getStyleClass().add("rectangle-map");
                     int finalI = i;
                     int finalJ = j;
                     rectangle.setOnMouseClicked(event -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name" );
+                        StringBuilder content = new StringBuilder("x=" + finalI + ", y=" + finalJ + ", name");
                         content.append(System.lineSeparator());
                         List<Resident> residents = CityDataStore.getInstance()
                                 .getResidents()
@@ -402,7 +402,7 @@ public class PageController implements Initializable {
                 } catch (InterruptedException interruptedException) {
 //                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Failure.");
 //                    alert.show();
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
                 }
             }
 //            Alert alert = new Alert(Alert.AlertType.INFORMATION, "END :D");
@@ -415,40 +415,40 @@ public class PageController implements Initializable {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException interruptedException) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
                 }
                 while (!ResidentComponent.stackOfAlarms.empty()) {
                     alarm = ResidentComponent.stackOfAlarms.pop();
                     alarms.add(alarm);
-                    File file=new File("userNotifications.txt");
-                    try{
-                        if(!file.exists()){
+                    File file = new File("userNotifications.txt");
+                    try {
+                        if (!file.exists()) {
                             file.createNewFile();
                         }
 
-                        FileWriter fileWriter=new FileWriter(file,true);
+                        FileWriter fileWriter = new FileWriter(file, true);
 
                         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                         bufferedWriter.write("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
                         bufferedWriter.write("\r\n");
                         bufferedWriter.close();
 
-                    } catch(IOException ex) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                    } catch (IOException ex) {
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
                     }
                     try {
-                        BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
-                        String content=br.readLine();
-                        String s="";
-                        while(content!=null) {
-                            s+= content+"\r\n";
-                            content=br.readLine();
+                        BufferedReader br = new BufferedReader(new FileReader("userNotifications.txt"));
+                        String content = br.readLine();
+                        String s = "";
+                        while (content != null) {
+                            s += content + "\r\n";
+                            content = br.readLine();
                         }
-                        Text text=new Text();
+                        Text text = new Text();
                         text.setText(s);
-                        Platform.runLater(()->notificationScrollPane.setContent(text));
+                        Platform.runLater(() -> notificationScrollPane.setContent(text));
                     } catch (IOException exception) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
                     }
                    /* Platform.runLater(() -> {
                         Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -466,7 +466,7 @@ public class PageController implements Initializable {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException interruptedException) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
                 }
                 for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
                     clinic.removeRecoveredResident();
@@ -495,7 +495,6 @@ public class PageController implements Initializable {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
-
             });*/
             boolean isAdded = false;
             for (int a = 0, size = CityDataStore.getInstance().getAmbulances().size(); a < size && !isAdded; a++) {
@@ -509,43 +508,43 @@ public class PageController implements Initializable {
                                 CityDataStore.getInstance().getAmbulances().get(a).setAmbulanceFree(false);
                                 isAdded = true;
                                 alarms.remove(j);
-                                File file=new File("userNotifications.txt");
-                                try{
-                                    if(!file.exists()){
+                                File file = new File("userNotifications.txt");
+                                try {
+                                    if (!file.exists()) {
                                         file.createNewFile();
                                     }
 
-                                    FileWriter fileWriter=new FileWriter(file,true);
+                                    FileWriter fileWriter = new FileWriter(file, true);
 
                                     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                                     bufferedWriter.write("Ambulantno vozilo poslano i stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
                                     bufferedWriter.write("\r\n");
                                     bufferedWriter.close();
 
-                                } catch(IOException ex) {
-                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                                } catch (IOException ex) {
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
                                 }
                                 try {
-                                    BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
-                                    String content=br.readLine();
-                                    String s="";
-                                    while(content!=null) {
-                                        s+= content+"\r\n";
-                                        content=br.readLine();
+                                    BufferedReader br = new BufferedReader(new FileReader("userNotifications.txt"));
+                                    String content = br.readLine();
+                                    String s = "";
+                                    while (content != null) {
+                                        s += content + "\r\n";
+                                        content = br.readLine();
                                     }
-                                    Text text=new Text();
+                                    Text text = new Text();
                                     text.setText(s);
-                                    Platform.runLater(()->notificationScrollPane.setContent(text));
+                                    Platform.runLater(() -> notificationScrollPane.setContent(text));
                                 } catch (IOException exception) {
-                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
                                 }
                                 //System.out.println("Poslano");
                                 //System.out.println("stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
-                                Random random=new Random();
+                                Random random = new Random();
                                 try {
                                     Thread.sleep(random.nextInt(5000));
                                 } catch (InterruptedException interruptedException) {
-                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
                                 }
                                 CityDataStore.getInstance().getAmbulances().get(a).setAmbulanceFree(true);
                             } else {
@@ -558,48 +557,50 @@ public class PageController implements Initializable {
                     }
                 }
             }
-            if(!isAdded) {
-                File file=new File("userNotifications.txt");
-                try{
-                    if(!file.exists()){
+            if (!isAdded) {
+                File file = new File("userNotifications.txt");
+                try {
+                    if (!file.exists()) {
                         file.createNewFile();
                     }
 
-                    FileWriter fileWriter=new FileWriter(file,true);
+                    FileWriter fileWriter = new FileWriter(file, true);
 
                     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                     bufferedWriter.write("Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...");
                     bufferedWriter.write("\r\n");
                     bufferedWriter.close();
 
-                } catch(IOException ex) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                } catch (IOException ex) {
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
                 }
                 try {
-                    BufferedReader br=new BufferedReader(new FileReader("userNotifications.txt"));
-                    String content=br.readLine();
-                    String s="";
-                    while(content!=null) {
-                        s+= content+"\r\n";
-                        content=br.readLine();
+                    BufferedReader br = new BufferedReader(new FileReader("userNotifications.txt"));
+                    String content = br.readLine();
+                    String s = "";
+                    while (content != null) {
+                        s += content + "\r\n";
+                        content = br.readLine();
                     }
-                    Text text=new Text();
+                    Text text = new Text();
                     text.setText(s);
-                    Platform.runLater(()->notificationScrollPane.setContent(text));
+                    Platform.runLater(() -> notificationScrollPane.setContent(text));
                 } catch (IOException exception) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
                 }
                 //System.out.println("Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...");
             }
-            synchronized (lockerInfectedPerson) {
-                synchronized (lockerThreadRunning) {
-                    //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
+            if (isAdded) {
+                synchronized (lockerInfectedPerson) {
+                    synchronized (lockerThreadRunning) {
+                        //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
+                    }
+                    lockerInfectedPerson.notify();
                 }
-                lockerInfectedPerson.notify();
             }
         });
         thread.start();
-        }
+    }
 
     @FXML
     void stopSimulation(MouseEvent e) {
@@ -610,31 +611,31 @@ public class PageController implements Initializable {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH_mm_ss__dd_MM_yyyy");
         LocalDateTime now = LocalDateTime.now();
         try {
-            endOfSimulation = new PrintWriter(new BufferedWriter(new FileWriter("SIM-JavaKov-20-"+dtf.format(now)+".txt")));
-            endOfSimulation.println("Trajanje simulacije: "+(CityDataStore.getInstance().getEndTimeOfSimulation()-CityDataStore.getInstance().getStartTimeOfSimulation())/1000+" sekundi");
+            endOfSimulation = new PrintWriter(new BufferedWriter(new FileWriter("SIM-JavaKov-20-" + dtf.format(now) + ".txt")));
+            endOfSimulation.println("Trajanje simulacije: " + (CityDataStore.getInstance().getEndTimeOfSimulation() - CityDataStore.getInstance().getStartTimeOfSimulation()) / 1000 + " sekundi");
             endOfSimulation.println();
             endOfSimulation.println("Broj kreiranih objekata:");
-            endOfSimulation.println("  -djeca: "+dataAboutCoronaCity.getDjeca());
-            endOfSimulation.println("  -odrasli: "+dataAboutCoronaCity.getOdrasli());
-            endOfSimulation.println("  -stari: "+dataAboutCoronaCity.getStari());
-            endOfSimulation.println("  -kuce: "+dataAboutCoronaCity.getBrojKuca());
-            endOfSimulation.println("  -kontrolni punktovi: "+dataAboutCoronaCity.getKontrolniPunktovi());
-            endOfSimulation.println("  -ambulantna vozila: "+dataAboutCoronaCity.getAmbulantnaVozila());
+            endOfSimulation.println("  -djeca: " + dataAboutCoronaCity.getDjeca());
+            endOfSimulation.println("  -odrasli: " + dataAboutCoronaCity.getOdrasli());
+            endOfSimulation.println("  -stari: " + dataAboutCoronaCity.getStari());
+            endOfSimulation.println("  -kuce: " + dataAboutCoronaCity.getBrojKuca());
+            endOfSimulation.println("  -kontrolni punktovi: " + dataAboutCoronaCity.getKontrolniPunktovi());
+            endOfSimulation.println("  -ambulantna vozila: " + dataAboutCoronaCity.getAmbulantnaVozila());
             endOfSimulation.println();
             endOfSimulation.println("Statisticki podaci:");
-            endOfSimulation.println("  Zarazeni: "+CityDataStore.getInstance().getInfectedResidents().size()+" od cega:");
-            endOfSimulation.println("    -djeca: "+CityDataStore.getInstance().getInfectedResidents()
-                    .stream().filter(r->r instanceof Child).collect(Collectors.toList()).size());
-            endOfSimulation.println("    -odrasli: "+CityDataStore.getInstance().getInfectedResidents()
-                    .stream().filter(r->r instanceof Adult).collect(Collectors.toList()).size());
-            endOfSimulation.println("    -stari: "+CityDataStore.getInstance().getInfectedResidents()
-                    .stream().filter(r->r instanceof Elder).collect(Collectors.toList()).size());
-            endOfSimulation.println("  Oporavljeni: "+CityDataStore.getInstance().getRecoveredResidents().size());
+            endOfSimulation.println("  Zarazeni: " + CityDataStore.getInstance().getInfectedResidents().size() + " od cega:");
+            endOfSimulation.println("    -djeca: " + CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r -> r instanceof Child).collect(Collectors.toList()).size());
+            endOfSimulation.println("    -odrasli: " + CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r -> r instanceof Adult).collect(Collectors.toList()).size());
+            endOfSimulation.println("    -stari: " + CityDataStore.getInstance().getInfectedResidents()
+                    .stream().filter(r -> r instanceof Elder).collect(Collectors.toList()).size());
+            endOfSimulation.println("  Oporavljeni: " + CityDataStore.getInstance().getRecoveredResidents().size());
             endOfSimulation.close();
         } catch (IOException ioException) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ioException.fillInStackTrace().toString());
         }
-        System.out.println("Simulacija zavrsena i trajala je "+(CityDataStore.getInstance().getEndTimeOfSimulation()-CityDataStore.getInstance().getStartTimeOfSimulation())/1000);
+        System.out.println("Simulacija zavrsena i trajala je " + (CityDataStore.getInstance().getEndTimeOfSimulation() - CityDataStore.getInstance().getStartTimeOfSimulation()) / 1000);
         System.exit(0);
     }
 
@@ -642,31 +643,31 @@ public class PageController implements Initializable {
     void reviewStateOfClinics(MouseEvent e) {
         Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
 
-        Scene previousScene=allowMovementImageView.getScene();
+        Scene previousScene = allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clinic_page.fxml"));
-        StateOfClinicsController stateOfClinicsController=new StateOfClinicsController(previousScene,city);
+        StateOfClinicsController stateOfClinicsController = new StateOfClinicsController(previousScene, city);
         loader.setController(stateOfClinicsController);
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
             //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-            Stage stage=new Stage();
+            Stage stage = new Stage();
             stage.setScene(scene);
             stage.show();
 
         } catch (IOException ioException) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ioException.fillInStackTrace().toString());
         }
         //new Thread(() -> {
-           // table.setItems((ObservableList<Clinic>) CityDataStore.getInstance().getClinics());
-            String s1="";
-            String s2="";
-            for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
-                s1+="Klinika"+clinic.getID()+"\n";
-                s2+=clinic.getCapacityOfClinic()+"\n";
-            }
-            stateOfClinicsController.setTextNameContent(s1);
-            stateOfClinicsController.setTextCapacityContent(s2);
+        // table.setItems((ObservableList<Clinic>) CityDataStore.getInstance().getClinics());
+        String s1 = "";
+        String s2 = "";
+        for (Clinic clinic : CityDataStore.getInstance().getClinics()) {
+            s1 += "Klinika" + clinic.getID() + "\n";
+            s2 += clinic.getCapacityOfClinic() + "\n";
+        }
+        stateOfClinicsController.setTextNameContent(s1);
+        stateOfClinicsController.setTextCapacityContent(s2);
         //}
         //).start();
 
@@ -679,7 +680,7 @@ public class PageController implements Initializable {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException interruptedException) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
         }
         File file = new File("states");
         file.mkdirs();
@@ -692,33 +693,34 @@ public class PageController implements Initializable {
                     alert.showAndWait();
                 });
             } catch (IOException ioException) {
-                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ioException.fillInStackTrace().toString());
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
                     alert.showAndWait();
                 });
             }
         } catch (IOException fileNotFoundException) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,fileNotFoundException.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, fileNotFoundException.fillInStackTrace().toString());
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
                 alert.showAndWait();
             });
         }
     }
+
     @FXML
-    private void showStatistic(MouseEvent e){
+    private void showStatistic(MouseEvent e) {
         Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
 
-        Scene previousScene=allowMovementImageView.getScene();
+        Scene previousScene = allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/statistics.fxml"));
-        StatisticController statisticController=new StatisticController(previousScene);
+        StatisticController statisticController = new StatisticController(previousScene);
         loader.setController(statisticController);
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
             //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-            Stage stage=new Stage();
+            Stage stage = new Stage();
             stage.setTitle("Corona City-statistic");
             stage.setScene(scene);
             stage.show();
@@ -726,7 +728,7 @@ public class PageController implements Initializable {
             statisticController.addInPieChartType();
             statisticController.addInPieChartGender();
         } catch (IOException ioException) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ioException.fillInStackTrace().toString());
         }
     }
 
@@ -739,7 +741,7 @@ public class PageController implements Initializable {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException interruptedException) {
-                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,interruptedException.fillInStackTrace().toString());
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, interruptedException.fillInStackTrace().toString());
             }
             FileChooser.ExtensionFilter serFilter
                     = new FileChooser.ExtensionFilter("Serializabled files", "*.ser");
@@ -760,21 +762,21 @@ public class PageController implements Initializable {
                     try {
                         CityDataStore.getInstance().loadData((CityDataStore) ois.readObject());
                     } catch (ClassNotFoundException classNotFoundException) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,classNotFoundException.fillInStackTrace().toString());
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, classNotFoundException.fillInStackTrace().toString());
                     }
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Kretanje nastavljeno i izvrsena deserijalizacija.");
                         alert.showAndWait();
                     });
                 } catch (IOException ioException) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ioException.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ioException.fillInStackTrace().toString());
                     Platform.runLater(() -> {
                         Alert alert = new Alert(Alert.AlertType.ERROR, "Greška pri upisivanju u fajl.");
                         alert.showAndWait();
                     });
                 }
             } catch (IOException fileNotFoundException) {
-                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,fileNotFoundException.fillInStackTrace().toString());
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, fileNotFoundException.fillInStackTrace().toString());
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Greška, fajl ne postoji.");
                     alert.showAndWait();
@@ -797,7 +799,7 @@ public class PageController implements Initializable {
 
             map.getColumnConstraints().clear();
             map.getRowConstraints().clear();
-            Platform.runLater(()->map.getChildren().clear());
+            Platform.runLater(() -> map.getChildren().clear());
 
             for (int i = 0; i < city.getMatrix().length; i++) {
                 map.getColumnConstraints().add(new ColumnConstraints(cellWidth));
@@ -806,12 +808,12 @@ public class PageController implements Initializable {
 
             for (int i = 0; i < CityDataStore.getInstance().getCitySize(); i++) {
                 for (int j = 0; j < CityDataStore.getInstance().getCitySize(); j++) {
-                    Rectangle rect=new Rectangle(cellHeight,cellWidth);
+                    Rectangle rect = new Rectangle(cellHeight, cellWidth);
                     //Rectangle rect = (Rectangle) city.getMatrix()[i][j];
                     rect.getStyleClass().add("rectangle-map");
                     JavaFXUtil.runAndWait(() -> rect.setFill(Color.rgb(238, 229, 222)));
                     rect.setUserData(null);
-                    city.setFieldOfMatrix(rect,i,j);
+                    city.setFieldOfMatrix(rect, i, j);
                     int finalI = i;
                     int finalJ = j;
                     Platform.runLater(() -> map.add(rect, finalI, finalJ));
@@ -849,11 +851,13 @@ public class PageController implements Initializable {
 
         }).start();
     }
-    public  PageController getPageController(){
+
+    public PageController getPageController() {
         return this;
     }
-    private void detectChangeOfFile(){
-        new Thread(()->{
+
+    private void detectChangeOfFile() {
+        new Thread(() -> {
             Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
             WatchService watcher = null;
             try {
@@ -865,18 +869,18 @@ public class PageController implements Initializable {
                     try {
                         key = watcher.take();
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
                         return;
                     }
 
                     for (WatchEvent<?> event : key.pollEvents()) {
                         WatchEvent<Path> ev = (WatchEvent<Path>) event;
                         Path fileName = ev.context();
-                        if(fileName.toString().trim().equals("clinic-info.txt")) {
+                        if (fileName.toString().trim().equals("clinic-info.txt")) {
                             List<String> content = Files.readAllLines(dir.resolve(fileName));
-                            if(content.size()>0)
+                            if (content.size() > 0)
                                 infectedPatients.setText(content.get(0));
-                                if(content.size()>1)
+                            if (content.size() > 1)
                                 recoveredPatients.setText(content.get(1));
                             //clinicScrollPane.setFitToWidth(true);
                             //Platform.runLater(()-> {
@@ -891,14 +895,14 @@ public class PageController implements Initializable {
                     }
                 }
 
-            }
-            catch (IOException e) {
-                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+            } catch (IOException e) {
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
             }
 
         }).start();
     }
-    public  ScrollPane getScrollPane(){
+
+    public ScrollPane getScrollPane() {
         return scrollPane;
     }
 }

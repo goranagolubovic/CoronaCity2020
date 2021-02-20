@@ -88,10 +88,7 @@ public class Clinic implements Serializable {
                             Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
                         }
                     }
-                    System.out.println("Stanovnik " + res.getId() + "se oporavio.");
-                    //zarazeni se vraca kuci nakon oporavka
-                    res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
-                            res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+
                     Optional<ResidentComponent> opt = ComponentsCityDataStore
                             .getInstance()
                             .getResidents()
@@ -100,6 +97,15 @@ public class Clinic implements Serializable {
                             .findFirst();
                     if (opt.isPresent()) {
                         synchronized (opt.get().getLockerInfected()) {
+                            try {
+                                Thread.sleep(3000);
+                                System.out.println("Stanovnik " + res.getId() + "se oporavio.");
+                                //zarazeni se vraca kuci nakon oporavka
+                                res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
+                                        res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+                            } catch (InterruptedException e) {
+                                Logger.getLogger(Clinic.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                            }
                             opt.get().getLockerInfected().notifyAll();
                         }
                     }

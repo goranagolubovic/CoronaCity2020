@@ -72,13 +72,13 @@ public abstract class ResidentComponent implements Runnable {
 
             wait = movement();
             //Ako je jos u kuci pauziraj  1s
-            if(!isResidentGetOutOfTheHouse(resident)){
+            /*if(!isResidentGetOutOfTheHouse(resident)){
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Logger.getLogger(ResidentComponent.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
                 }
-            }
+            }*/
             //Ako je zarazen
             if (checkDistanceOfResidentAndControlStation() && isResidentGetOutOfTheHouse(resident) && resident.getBodyTemperature() > 37.0) { //&& PageController.isThreadRunning
 
@@ -90,23 +90,23 @@ public abstract class ResidentComponent implements Runnable {
                         if (!(rectangle.getUserData() instanceof ControlStation || rectangle.getUserData() instanceof Clinic
                         || rectangle.getUserData() instanceof House)) {
                             rectangle.setUserData(null);
-                            JavaFXUtil.runAndWait(() -> {
+                            Platform.runLater(() -> {
                                 rectangle.setFill(Color.rgb(238, 229, 222));
                             });
                         } else if(rectangle.getUserData() instanceof ControlStation) {
-                            JavaFXUtil.runAndWait(() -> {
+                            Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
                             });
                             rectangle.setUserData(previousControlStation);
                         }
                         else if(rectangle.getUserData() instanceof House){
-                            JavaFXUtil.runAndWait(() -> {
+                            Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/home.png")));
                             });
                             rectangle.setUserData(previousHouse);
                         }
                         else{
-                            JavaFXUtil.runAndWait(() -> {
+                            Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                             });
                             rectangle.setUserData(previousClinic);
