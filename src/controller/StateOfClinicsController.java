@@ -23,10 +23,12 @@ public class StateOfClinicsController {
     private Scene previousScene;
     private City city;
     private boolean isClinicAdd=false;
+    private DataAboutCoronaCity dataAboutCoronaCity;
 
-    public StateOfClinicsController(Scene previousScene, City city){
+    public StateOfClinicsController(Scene previousScene, City city,DataAboutCoronaCity dataAboutCoronaCity){
         this.previousScene=previousScene;
         this.city=city;
+        this.dataAboutCoronaCity=dataAboutCoronaCity;
     }
     @FXML
     private Text textName;
@@ -70,7 +72,10 @@ public class StateOfClinicsController {
             }
             Rectangle rectangle=(Rectangle) city.getFieldOfMatrix(j,i);
             if(rectangle.getUserData()==null){
-                Clinic clinic=new Clinic(r.nextInt(100),4,j,i);
+                Random random=new Random();
+                int numberOfResidents = dataAboutCoronaCity.getDjeca() + dataAboutCoronaCity.getStari() + dataAboutCoronaCity.getOdrasli();
+                int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
+                Clinic clinic=new Clinic(r.nextInt(100),clinicCapacity,j,i);
                 rectangle.setUserData(clinic);
                 rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                 CityDataStore.getInstance().addClinic(clinic);
@@ -81,6 +86,12 @@ public class StateOfClinicsController {
             }
 
         }
+    }
+    @FXML
+    void returnToSimulation(MouseEvent e) {
+        Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+        stage.setScene(previousScene);
+        stage.show();
     }
 
 

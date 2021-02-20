@@ -19,6 +19,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -135,7 +136,7 @@ public class PageController implements Initializable {
         double gridWidth = 500;
         double gridHeight = 500;
 
-        double cellHeight = gridHeight / city.getMatrix().length;
+        double cellHeight = gridHeight/ city.getMatrix().length;
         double cellWidth = gridWidth / city.getMatrix().length;
 
         map.getColumnConstraints().clear();
@@ -153,11 +154,14 @@ public class PageController implements Initializable {
                 if ((i == 0 && j == 0) || (i == 0 && j == (city.getMatrix().length - 1)) || (j == 0 && i == (city.getMatrix().length - 1)) || (i == (city.getMatrix().length - 1) && j == (city.getMatrix().length - 1))) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
                     //int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
-                    int clinicCapacity = 4;
                     int id = random.nextInt(100);
+                    int clinicCapacity=4;
                     System.out.println("Kapacitet novokreirane klinike je " + clinicCapacity);
                     Clinic clinic = new Clinic(id, clinicCapacity, i, j);
-                    rectangle.getStyleClass().add("rectangle-map");
+                    //rectangle.getStyleClass().add("rectangle-map");
+                    rectangle.setStroke(Color.rgb(244,244,244));
+                    rectangle.setStrokeWidth(0.5);
+                    rectangle.setStrokeLineJoin(StrokeLineJoin.MITER);
                     rectangle.setFill(Color.rgb(238, 229, 222));
                     rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                     rectangle.setUserData(clinic);
@@ -213,7 +217,10 @@ public class PageController implements Initializable {
         while (br != numberOfHouses) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
             rectangle.setFill(Color.rgb(238, 229, 222));
-            rectangle.getStyleClass().add("rectangle-map");
+           // rectangle.getStyleClass().add("rectangle-map");
+            rectangle.setStroke(Color.rgb(244,244,244));
+            rectangle.setStrokeWidth(0.5);
+            rectangle.setStrokeLineJoin(StrokeLineJoin.MITER);
             //House house=new House((long)br);
 
             int freeIndex = r.nextInt(freePositions.size() - 1);
@@ -312,7 +319,10 @@ public class PageController implements Initializable {
         while (br != controls) {
             Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
             rectangle.setFill(Color.rgb(238, 229, 222));
-            rectangle.getStyleClass().add("rectangle-map");
+            //rectangle.getStyleClass().add("rectangle-map");
+            rectangle.setStroke(Color.rgb(244,244,244));
+            rectangle.setStrokeWidth(0.5);
+            rectangle.setStrokeLineJoin(StrokeLineJoin.MITER);
             ControlStation controlStation = new ControlStation();
             int iPosition = r.nextInt(city.getMatrix().length - 1);
             int jPosition = r.nextInt(city.getMatrix().length - 1);
@@ -341,7 +351,10 @@ public class PageController implements Initializable {
                 if ((Rectangle) city.getFieldOfMatrix(i, j) == null) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
                     rectangle.setFill(Color.rgb(238, 229, 222));
-                    rectangle.getStyleClass().add("rectangle-map");
+                    //rectangle.getStyleClass().add("rectangle-map");
+                    rectangle.setStroke(Color.rgb(244,244,244));
+                    rectangle.setStrokeWidth(0.5);
+                    rectangle.setStrokeLineJoin(StrokeLineJoin.MITER);
                     int finalI = i;
                     int finalJ = j;
                     rectangle.setOnMouseClicked(event -> {
@@ -429,7 +442,7 @@ public class PageController implements Initializable {
                         FileWriter fileWriter = new FileWriter(file, true);
 
                         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                        bufferedWriter.write("Posaljite ambulantu na poziciju (" + alarm.getFirstCoordinate() + "," + alarm.getSecondCoordinate() + ").");
+                        bufferedWriter.write("Posaljite ambulantu na poziciju (" + alarm.getSecondCoordinate() + "," + alarm.getFirstCoordinate() + ").");
                         bufferedWriter.write("\r\n");
                         bufferedWriter.close();
 
@@ -478,7 +491,7 @@ public class PageController implements Initializable {
         thread1.start();
     }
 
-    @FXML
+  /*  @FXML
     private void sendAmbulance(MouseEvent e) {
         Thread thread = new Thread(() -> {
             Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
@@ -491,11 +504,11 @@ public class PageController implements Initializable {
 //                interruptedException.printStackTrace();
 //            }
 
-            /*Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
-            });*/
+            });
             boolean isAdded = false;
             for (int a = 0, size = CityDataStore.getInstance().getAmbulances().size(); a < size && !isAdded; a++) {
                 if (CityDataStore.getInstance().getAmbulances().get(a).getAmbulanceFree()) {
@@ -600,7 +613,51 @@ public class PageController implements Initializable {
             }
         });
         thread.start();
-    }
+    }*/
+  @FXML
+  private void sendAmbulance(MouseEvent e) {
+      Thread thread = new Thread(() -> {
+          Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
+//            try {
+//                synchronized (mapLocker) {
+//
+//                    mapLocker.wait();
+//                }
+//            } catch (InterruptedException interruptedException) {
+//                interruptedException.printStackTrace();
+//            }
+            /*Platform.runLater(() -> {
+                Alert a = new Alert(Alert.AlertType.INFORMATION);
+                a.setContentText("Poslano je ambulanto vozilo. 😊");
+                a.show();
+            });*/  boolean isAdded = false;
+          List<Clinic> clinics = CityDataStore.getInstance().getClinics();
+          for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize && !isAdded; i++) {
+              Clinic clinic = clinics.get(i);
+              for (int j = 0; j < alarms.size() && !isAdded; j++) {
+                  Alarm alarm = alarms.get(j);
+                  if (clinic.addInfectedResident(alarm.getResident())) {
+                      alarms.remove(j);
+                      System.out.println("stanovnik " + alarm.getResident().getId() + " je dodan u kliniku " + clinic.getCapacityOfClinic());
+                      isAdded = true;
+                  } else {
+                      if (i == clinicsSize - 1) {
+                          System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
+                          // TODO: Napraviti čekanje nove klinike
+                      }
+                  }
+              }
+          }
+          System.out.println("Poslano");
+          synchronized (lockerInfectedPerson) {
+              synchronized (lockerThreadRunning) {
+                  //isThreadRunning = false;//da zaustavimo tred zarazenog stanovnika
+              }
+              lockerInfectedPerson.notify();
+          }
+      });
+      thread.start();
+  }
 
     @FXML
     void stopSimulation(MouseEvent e) {
@@ -645,14 +702,15 @@ public class PageController implements Initializable {
 
         Scene previousScene = allowMovementImageView.getScene();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clinic_page.fxml"));
-        StateOfClinicsController stateOfClinicsController = new StateOfClinicsController(previousScene, city);
+        StateOfClinicsController stateOfClinicsController = new StateOfClinicsController(previousScene, city,dataAboutCoronaCity);
         loader.setController(stateOfClinicsController);
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
-            //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-            Stage stage = new Stage();
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            //Stage stage = new Stage();
             stage.setScene(scene);
+            stage.setTitle("Corona City");
             stage.show();
 
         } catch (IOException ioException) {
@@ -719,9 +777,9 @@ public class PageController implements Initializable {
         try {
             Parent root = (Parent) loader.load();
             Scene scene = new Scene(root);
-            //Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
-            Stage stage = new Stage();
-            stage.setTitle("Corona City-statistic");
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+            //Stage stage = new Stage();
+            stage.setTitle("Corona City");
             stage.setScene(scene);
             stage.show();
             statisticController.addInPieChartNumber();
@@ -810,7 +868,10 @@ public class PageController implements Initializable {
                 for (int j = 0; j < CityDataStore.getInstance().getCitySize(); j++) {
                     Rectangle rect = new Rectangle(cellHeight, cellWidth);
                     //Rectangle rect = (Rectangle) city.getMatrix()[i][j];
-                    rect.getStyleClass().add("rectangle-map");
+                    //rect.getStyleClass().add("rectangle-map");
+                    rect.setStrokeWidth(0.5);
+                    rect.setStroke(Color.rgb(244,244,244));
+                    rect.setStrokeLineJoin(StrokeLineJoin.MITER);
                     JavaFXUtil.runAndWait(() -> rect.setFill(Color.rgb(238, 229, 222)));
                     rect.setUserData(null);
                     city.setFieldOfMatrix(rect, i, j);
@@ -862,7 +923,10 @@ public class PageController implements Initializable {
             WatchService watcher = null;
             try {
                 watcher = FileSystems.getDefault().newWatchService();
-                Path dir = Paths.get("C:\\Users\\goran\\Desktop\\PJ2_Projekat");
+                Properties properties = new Properties();
+                properties.load(new FileInputStream("paths.properties"));
+                Path dir=Paths.get(properties.getProperty("FILE_WATCHER_PATH"));
+                //Path dir = Paths.get("C:\\Users\\goran\\Desktop\\PJ2_Projekat");
                 dir.register(watcher, ENTRY_MODIFY);
                 while (true) {
                     WatchKey key;

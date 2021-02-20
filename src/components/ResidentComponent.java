@@ -300,8 +300,8 @@ public abstract class ResidentComponent implements Runnable {
             FileWriter fileWriter=new FileWriter(file,true);
 
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(resident.getName()+resident.getId()+","+direction+",("+resident.getCurrentPositionOfResident().getFirstCoordinate()
-                    +","+resident.getCurrentPositionOfResident().getSecondCoordinate()+")");
+            bufferedWriter.write(resident.getName()+resident.getId()+","+direction+",("+resident.getCurrentPositionOfResident().getSecondCoordinate()
+                    +","+resident.getCurrentPositionOfResident().getFirstCoordinate()+")");
             bufferedWriter.write("\r\n");
             bufferedWriter.close();
 

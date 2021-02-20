@@ -1,2 +1,0 @@
-Posaljite ambulantu na poziciju (4,1).
-Ambulantno vozilo poslano i stanovnik 5 je dodan u kliniku 3
