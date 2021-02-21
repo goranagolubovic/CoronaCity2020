@@ -105,32 +105,32 @@
                      <children>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="odrasli" alignment="CENTER" prefHeight="200.0" prefWidth="60.0" promptText="ODRASLI" text="3" />
+                              <TextField fx:id="odrasli" alignment="CENTER" prefHeight="200.0" prefWidth="60.0" promptText="ODRASLI" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="29.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="8" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="djeca" alignment="CENTER" prefHeight="200.0" prefWidth="60.0" promptText="DJECA" text="7" />
+                              <TextField fx:id="djeca" alignment="CENTER" prefHeight="200.0" prefWidth="60.0" promptText="DJECA" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="88.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="11" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="stari" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="STARI" text="3" />
+                              <TextField fx:id="stari" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="STARI" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="146.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="14" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="kuce" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ KUCA" text="10" />
+                              <TextField fx:id="kuce" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ KUCA" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="204.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="17" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="punktovi" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ KONTROLNIH STANICA" text="5" />
+                              <TextField fx:id="punktovi" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ KONTROLNIH STANICA" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" layoutX="10.0" layoutY="262.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="20" GridPane.rowSpan="2">
                            <children>
-                              <TextField fx:id="ambulante" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ AMBULANTNIH VOZILA" text="1" />
+                              <TextField fx:id="ambulante" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" promptText="BROJ AMBULANTNIH VOZILA" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="24">

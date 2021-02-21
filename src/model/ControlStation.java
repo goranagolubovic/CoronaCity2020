@@ -5,7 +5,8 @@ import java.io.Serializable;
 public class ControlStation implements Serializable {
     private int firstCoordinateOfControlStation;
     private int secondCoordinateOfControlStation;
-    public ControlStation(){
+
+    public ControlStation() {
 
     }
 

@@ -20,10 +20,13 @@ import model.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FXMain extends Application {
     @FXML
     private ImageView coronaVirusRotateImageView;
+
     public static void main(String[] args) throws NotChildException, NotElderException, NotAdultException {
         launch(args);
     }
@@ -31,35 +34,18 @@ public class FXMain extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         Parent root = null;
-        //MainPageController mainPageController = new MainPageController();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main_page.fxml"));
-        //loader.setController(mainPageController);
         try {
             root = loader.load();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.getLogger(FXMain.class.getName()).addHandler(MainPageController.handler);
+            Logger.getLogger(FXMain.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
         }
         Scene scene1 = new Scene(root);
         primaryStage.setScene(scene1);
         primaryStage.setResizable(false);
         primaryStage.setTitle("Corona City");
         primaryStage.show();
-        /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/page.fxml"));
-        PageController controller = new PageController();
-        loader.setController(controller);
-        try {
-            root = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Scene scene = new Scene(root, 1240, 700);
-        scene.getStylesheets().add("view/style.css");
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.setTitle("Corona City");
-        primaryStage.show();
-
-    }*/
     }
 
 }

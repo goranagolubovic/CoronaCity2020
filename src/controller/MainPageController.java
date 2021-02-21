@@ -14,10 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import model.CityDataStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,9 +30,7 @@ import java.util.logging.Logger;
 
 public class MainPageController implements Initializable {
 
-    public Object locker = new Object();
     public static Handler handler;
-    protected static int brojKuca;
     @FXML
     private TextField kuce;
     @FXML
@@ -63,8 +59,8 @@ public class MainPageController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         startRotate();
         //kreiraj log fajl
-        File logFile=new File("corona_city.log");
-        if(logFile.exists()){
+        File logFile = new File("corona_city.log");
+        if (logFile.exists()) {
             logFile.delete();
         }
         try {
@@ -78,7 +74,7 @@ public class MainPageController implements Initializable {
     private void startSimulation(ActionEvent e) throws IOException {
 
 
-        handler=new FileHandler("corona_city.log",true);
+        handler = new FileHandler("corona_city.log", true);
         Logger.getLogger(MainPageController.class.getName()).addHandler(handler);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/page.fxml"));
@@ -92,12 +88,12 @@ public class MainPageController implements Initializable {
             djecaNum = Integer.parseInt(djeca.getText());
             stariNum = Integer.parseInt(stari.getText());
         } catch (NumberFormatException ex) {
-            Logger.getLogger(MainPageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+            Logger.getLogger(MainPageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
             Alert alert = new Alert(Alert.AlertType.ERROR, "Enter positive integers as values.");
             alert.showAndWait();
             return;
         }
-        if(odrasliNum==0 && stariNum==0){
+        if (odrasliNum == 0 && stariNum == 0) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Children can't be alone in house. You must add one or more adults or elders.");
             alert.showAndWait();
             return;
@@ -109,13 +105,6 @@ public class MainPageController implements Initializable {
         loader.setController(pageController);
         Parent root = (Parent) loader.load();
         ComponentsCityDataStore.getInstance().addController(loader.getController());
-        //proslijedjuje podatke o broju kuca,odraslih,djece...u drugi kontoler...
-       /*pageController.setBrojKuca(kuce.getText());
-       pageController.setBrojAmbulantnihVozila(ambulante.getText());
-       pageController.setBrojKontrolnihPunktova(punktovi.getText());
-       pageController.setBrojOdraslih(odrasli.getText());
-       pageController.setBrojDjece(djeca.getText());
-       pageController.setBrojStarih(stari.getText());*/
 
 
         Scene scene = new Scene(root);
@@ -123,6 +112,7 @@ public class MainPageController implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
+
     public void startRotate() {
         List<RotateTransition> rotateTransitions = new ArrayList<>();
         rotateTransitions.add(new RotateTransition(Duration.millis(3000), coronaVirusRotateImageView1));

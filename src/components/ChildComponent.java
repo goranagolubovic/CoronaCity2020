@@ -6,7 +6,7 @@ import model.*;
 import java.util.Calendar;
 
 public class ChildComponent extends ResidentComponent {
-    public ChildComponent(Child child){
+    public ChildComponent(Child child) {
         super(child);
     }
 
@@ -32,10 +32,14 @@ public class ChildComponent extends ResidentComponent {
     }
 
     @Override
-    public Image getImageOfResident() { return new Image("view/images/child.png"); }
+    public Image getImageOfResident() {
+        return new Image("view/images/child.png");
+    }
 
     @Override
-    public Image getImageOfResidentWithThermometer() { return new Image("view/images/thermometer+child.png"); }
+    public Image getImageOfResidentWithThermometer() {
+        return new Image("view/images/thermometer+child.png");
+    }
 
     @Override
     public Image getImageOfResidentWithClinic() {
@@ -48,7 +52,7 @@ public class ChildComponent extends ResidentComponent {
     }
 
     @Override
-    public boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident) {
+    public boolean checkDistance(int firstCoordinate, int secondCoordinate, Resident resident) {
         return true;
     }
 

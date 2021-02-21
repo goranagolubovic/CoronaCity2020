@@ -1,9 +1,5 @@
 package model;
 
-import components.ResidentComponent;
-//import controller.PageController;
-import model.Resident;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +14,10 @@ public class CityDataStore implements Serializable {
     private List<ControlStation> controlStations;
     private List<Clinic> clinics;
     private int citySize;
-    private List<Resident>infectedResidents;
+    private List<Resident> infectedResidents;
     private List<Resident> recoveredResidents;
 
-    private List<Ambulance>ambulances;
+    private List<Ambulance> ambulances;
     private Long startTimeOfSimulation;
     private Long endTimeOfSimulation;
 
@@ -40,6 +36,7 @@ public class CityDataStore implements Serializable {
     public void setStartTimeOfSimulation(Long startTimeOfSimulation) {
         this.startTimeOfSimulation = startTimeOfSimulation;
     }
+
     public List<Ambulance> getAmbulances() {
         return ambulances;
     }
@@ -55,24 +52,33 @@ public class CityDataStore implements Serializable {
     public void setInfectedResidents(List<Resident> infectedResidents) {
         this.infectedResidents = infectedResidents;
     }
-    public  void setRecoveredResidents(List<Resident>recoveredResidents){this .recoveredResidents=recoveredResidents;}
+
+    public void setRecoveredResidents(List<Resident> recoveredResidents) {
+        this.recoveredResidents = recoveredResidents;
+    }
+
     private CityDataStore() {
         residents = new ArrayList<>();
         houses = new ArrayList<>();
         controlStations = new ArrayList<>();
         clinics = new ArrayList<>();
-        infectedResidents=new ArrayList<>();
-        recoveredResidents=new ArrayList<>();
-        ambulances=new ArrayList<>();
+        infectedResidents = new ArrayList<>();
+        recoveredResidents = new ArrayList<>();
+        ambulances = new ArrayList<>();
     }
 
     public static CityDataStore getInstance() {
         return (singleton == null) ? (singleton = new CityDataStore()) : singleton;
     }
-    public  synchronized  void addInfectedResident(Resident resident){
+
+    public synchronized void addInfectedResident(Resident resident) {
         infectedResidents.add(resident);
     }
-    public  synchronized void addRecoveredResident(Resident resident){recoveredResidents.add(resident);}
+
+    public synchronized void addRecoveredResident(Resident resident) {
+        recoveredResidents.add(resident);
+    }
+
     public synchronized void addResident(Resident resident) {
         resident.setId(createResidentID());
         residents.add(resident);
@@ -91,12 +97,14 @@ public class CityDataStore implements Serializable {
         clinics.add(clinic);
     }
 
-    public synchronized  void addAmbulance(Ambulance ambulance){
+    public synchronized void addAmbulance(Ambulance ambulance) {
         ambulances.add(ambulance);
     }
-    public synchronized void removeAmbulance(Ambulance ambulance){
+
+    public synchronized void removeAmbulance(Ambulance ambulance) {
         ambulances.remove(ambulance);
     }
+
     private Long createResidentID() {
         Optional<Resident> optionalResident = residents.stream().max((a, b) -> (int) (a.getId() - b.getId()));
         //ako postoji maksimum

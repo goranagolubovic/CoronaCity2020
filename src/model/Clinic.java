@@ -7,7 +7,6 @@ import controller.PageController;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +23,6 @@ public class Clinic implements Serializable {
 
 
     private List<Resident> infectedResidents = new ArrayList<>();
-    protected PageController.SimulationStopped simulationStopped;
     private int clinicID;
 
     public Clinic(int clinicID, int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
@@ -75,7 +73,7 @@ public class Clinic implements Serializable {
                         get(i);
 
                 int size = res.getThreeLastBodyTemperatures().size();
-                double average =  res.getThreeLastBodyTemperatures().stream().reduce(0.0, (a, b) -> a + b) / size;
+                double average = res.getThreeLastBodyTemperatures().stream().reduce(0.0, (a, b) -> a + b) / size;
                 res.setInfected(average > 37.0);
 
                 if (!res.isInfected()) {
@@ -102,7 +100,6 @@ public class Clinic implements Serializable {
                             .filter(r -> res.getId() == r.getResident().getId())
                             .findFirst();
                     if (opt.isPresent()) {
-                        System.out.println("Stanovnik " + res.getId() + "se oporavio.");
                         //zarazeni se vraca kuci nakon oporavka
                         res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
                                 res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());

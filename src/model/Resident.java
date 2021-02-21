@@ -1,28 +1,12 @@
 package model;
 
-
 import components.ResidentComponent;
-import controller.DataAboutCoronaCity;
-import controller.PageController;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import util.JavaFXUtil;
 
-import javax.swing.*;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Timer;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-
-//import static model.City.isFieldOfMatrixFree;
 
 public abstract class Resident implements Serializable {
     protected Long id;
@@ -189,4 +173,3 @@ public abstract class Resident implements Serializable {
     }
 }
 
-//}

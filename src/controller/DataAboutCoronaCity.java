@@ -68,13 +68,16 @@ public class DataAboutCoronaCity {
     public int getStari() {
         return stari;
     }
-    public void setArrayOfHouses(int i,House house){
-        arrayOfHouses[i]=house;
+
+    public void setArrayOfHouses(int i, House house) {
+        arrayOfHouses[i] = house;
     }
-    public Long getHouseIDFromArray(int i){
+
+    public Long getHouseIDFromArray(int i) {
         return arrayOfHouses[i].getId();
     }
-    public House [] getArrayOfHouses(){
+
+    public House[] getArrayOfHouses() {
         return arrayOfHouses;
     }
 }

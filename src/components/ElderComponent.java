@@ -6,8 +6,8 @@ import model.*;
 import java.util.Calendar;
 
 public class ElderComponent extends ResidentComponent {
-    public ElderComponent(Elder elder)  {
-       super(elder);
+    public ElderComponent(Elder elder) {
+        super(elder);
     }
 
     @Override
@@ -37,7 +37,9 @@ public class ElderComponent extends ResidentComponent {
     }
 
     @Override
-    public Image getImageOfResidentWithThermometer() { return new Image("view/images/thermometer+elder.png"); }
+    public Image getImageOfResidentWithThermometer() {
+        return new Image("view/images/thermometer+elder.png");
+    }
 
     @Override
     public Image getImageOfResidentWithClinic() {
@@ -50,8 +52,8 @@ public class ElderComponent extends ResidentComponent {
     }
 
     @Override
-    public boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident) {
-        return city.checkDistanceOfField(firstCoordinate, secondCoordinate,resident, 0, Elder.class, Adult.class, ElderComponent.class, AdultComponent.class);
+    public boolean checkDistance(int firstCoordinate, int secondCoordinate, Resident resident) {
+        return city.checkDistanceOfField(firstCoordinate, secondCoordinate, resident, 0, Elder.class, Adult.class, ElderComponent.class, AdultComponent.class);
     }
 
 

@@ -8,22 +8,26 @@ public class Alarm implements Serializable {
     Long houseId;
     Resident resident;
 
-    public Alarm(int firstCoordinate, int secondCoordinate, Long houseID,Resident resident) {
-        this.firstCoordinate=firstCoordinate;
-        this.secondCoordinate=secondCoordinate;
-        this.houseId=houseID;
-        this.resident=resident;
+    public Alarm(int firstCoordinate, int secondCoordinate, Long houseID, Resident resident) {
+        this.firstCoordinate = firstCoordinate;
+        this.secondCoordinate = secondCoordinate;
+        this.houseId = houseID;
+        this.resident = resident;
     }
-    public int getFirstCoordinate(){
+
+    public int getFirstCoordinate() {
         return firstCoordinate;
     }
-    public int getSecondCoordinate(){
-        return  secondCoordinate;
+
+    public int getSecondCoordinate() {
+        return secondCoordinate;
     }
-    public Long getHouseId(){
-        return  houseId;
+
+    public Long getHouseId() {
+        return houseId;
     }
-    public Resident getResident(){
+
+    public Resident getResident() {
         return resident;
     }
 }

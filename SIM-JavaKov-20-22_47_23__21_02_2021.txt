@@ -1,0 +1,16 @@
+Trajanje simulacije: 27 sekundi
+
+Broj kreiranih objekata:
+  -djeca: 10
+  -odrasli: 10
+  -stari: 10
+  -kuce: 10
+  -kontrolni punktovi: 10
+  -ambulantna vozila: 10
+
+Statisticki podaci:
+  Zarazeni: 1 od cega:
+    -djeca: 0
+    -odrasli: 0
+    -stari: 1
+  Oporavljeni: 0

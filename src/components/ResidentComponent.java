@@ -22,33 +22,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-//import static model.City.isFieldOfMatrixFree;
 
 public abstract class ResidentComponent implements Runnable {
     protected Resident resident;
 
-    /* public static class BackToHome{
-         public static boolean goBackToHome;
-         public BackToHome(boolean o){
-             goBackToHome= o;
-         }
-     }*/
     // From controller
-    protected PositionOfResident newCoordinates;
+    public PositionOfResident newCoordinates;
     protected City city;
-    protected ControlStation previousControlStation;
-    protected House previousHouse;
-    protected Clinic previousClinic;
+    public ControlStation previousControlStation;
+    public House previousHouse;
+    public Clinic previousClinic;
     protected PageController.SimulationStopped simulationStopped;
     protected DataAboutCoronaCity dataAboutCoronaCity;
     public static final Object locker = new Object();
-    private static final Object lockerBackToHome = new Object();
     public static Stack<Alarm> stackOfAlarms = new Stack<Alarm>();
     protected boolean backToHome = false;
     protected final Object lockerInfected = new Object();
-    private final Object lockerAddingToClinics = new Object();
     private DataAboutMovement dataAboutMovement = new DataAboutMovement();
-    Context context;
 
     public ResidentComponent(Resident resident) {
         this.resident = resident;
@@ -63,23 +53,12 @@ public abstract class ResidentComponent implements Runnable {
             if (wait) {
                 try {
                     Thread.sleep(1200);
-                    //Thread.sleep((long) (50 + new Random().nextDouble() * 300));
                 } catch (InterruptedException e1) {
-                    // TODO Auto-generated catch block
                     Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e1.fillInStackTrace().toString());
                 }
             }
-            List<Resident> recoveredResidents;
 
             wait = movement();
-            //Ako je jos u kuci pauziraj  1s
-            /*if(!isResidentGetOutOfTheHouse(resident)){
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Logger.getLogger(ResidentComponent.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
-                }
-            }*/
             //Ako je zarazen
             if (checkDistanceOfResidentAndControlStation() && isResidentGetOutOfTheHouse(resident) && resident.getBodyTemperature() > 37.0) { //&& PageController.isThreadRunning
                 resident.setInfected(true);
@@ -117,7 +96,7 @@ public abstract class ResidentComponent implements Runnable {
                     }
 
                 }
-                while(resident.isInfected()){
+                while (resident.isInfected()) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -138,15 +117,13 @@ public abstract class ResidentComponent implements Runnable {
                 if (backToHome && resident.getCurrentPositionOfResident().getFirstCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getFirstCoordinateOfHouse()
                         && resident.getCurrentPositionOfResident().getSecondCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getSecondCoordinateOfHouse()) {
                     List<ResidentComponent> listOfInfectedHouseMates = findInfectedHouseMates(resident);
-                    while(listOfInfectedHouseMates.stream().anyMatch(res -> res.resident.isInfected())){
+                    while (listOfInfectedHouseMates.stream().anyMatch(res -> res.resident.isInfected())) {
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                        System.out.println("Vrti se");
                     }
-                    System.out.println("Nastavljeno kretanje od kuce...");
                     backToHome = false;
                 }
             }
@@ -193,7 +170,6 @@ public abstract class ResidentComponent implements Runnable {
                 case Bottom -> secondCoordinate++;
             }
         } else {
-            System.out.println("Povratak kuci.." + resident.getId());
             switch (direction) {
                 case Up -> secondCoordinate--;
                 case Left -> firstCoordinate--;
@@ -213,7 +189,7 @@ public abstract class ResidentComponent implements Runnable {
             return false;
         }
 
-        if (/*!(fieldContent instanceof House) &&*/ newCoordinates != null) {
+        if (newCoordinates != null) {
             synchronized (locker) {
                 oldRectangle = (Rectangle) city.getFieldOfMatrix(newCoordinates.getFirstCoordinate(), newCoordinates.getSecondCoordinate());
 
@@ -236,11 +212,6 @@ public abstract class ResidentComponent implements Runnable {
                     JavaFXUtil.runAndWait(() -> oldRectangle.setFill(Color.rgb(238, 229, 222)));
                     oldRectangle.setUserData(null);
                 }
-//                synchronized (PageController.lockerThreadRunning) {
-//                    if (!PageController.isThreadRunning) {
-//                        return false;
-//                    }
-//                }
                 previousHouse = null;
                 previousClinic = null;
                 previousControlStation = null;
@@ -270,12 +241,9 @@ public abstract class ResidentComponent implements Runnable {
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
-                System.out.println("Vrti se");
             }
-            System.out.println("Nastavljeno kretanje od kuce...");
             backToHome = false;
             return true;
-            //simulationStopped.isSimulationStopped=false;
         }
 
         Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
@@ -364,10 +332,6 @@ public abstract class ResidentComponent implements Runnable {
         } else
             return Direction.Bottom;
 
-    }
-
-    public synchronized DataAboutMovement getDataAboutMovement() {
-        return dataAboutMovement;
     }
 
 
@@ -466,4 +430,3 @@ public abstract class ResidentComponent implements Runnable {
     }
 }
 
-//}

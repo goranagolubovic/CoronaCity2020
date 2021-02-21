@@ -2,15 +2,8 @@ package model;
 
 import components.AdultComponent;
 import components.ResidentComponent;
-import javafx.application.Platform;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
 
 import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
 
 public class Adult extends Resident {
 

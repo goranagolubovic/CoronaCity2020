@@ -21,16 +21,17 @@ public class City implements Serializable {
     }
 
     private int citySize;
+
     public City() {
         Random random = new Random();
-        int randNumber = 15+random.nextInt(15);
-       // int randNumber = 5;
+        int randNumber = 15 + random.nextInt(15);
         CityDataStore.getInstance().setCitySize(randNumber);
         matrix = new Object[randNumber][randNumber];
         CityDataStore.getInstance().setCitySize(randNumber);
     }
-    public City(int citySize){
-        matrix=new Object[citySize][citySize];
+
+    public City(int citySize) {
+        matrix = new Object[citySize][citySize];
     }
 
     public Object[][] getMatrix() {
@@ -51,9 +52,9 @@ public class City implements Serializable {
             for (int j = -2; j <= 2; j++) {
                 if (firstCoordinate + i >= 0 && firstCoordinate + i < getMatrix().length &&
                         secondCoordinate + j >= 0 && secondCoordinate + j < getMatrix().length) {
-                    Object obj = getFieldOfMatrix(firstCoordinate + i,secondCoordinate + j);
+                    Object obj = getFieldOfMatrix(firstCoordinate + i, secondCoordinate + j);
                     if (obj != null) {
-                        Rectangle rectangle = (Rectangle) getFieldOfMatrix(firstCoordinate + i,secondCoordinate + j);
+                        Rectangle rectangle = (Rectangle) getFieldOfMatrix(firstCoordinate + i, secondCoordinate + j);
                         Object content = rectangle.getUserData();
                         if (content != null) {
                             if (resident != null) {
@@ -65,7 +66,7 @@ public class City implements Serializable {
                                         }
                                     }
                                 }
-                            }else{
+                            } else {
                                 if (Arrays.stream(classTypes).anyMatch(cl -> cl.isInstance(content))) {
                                     counter++;
                                 }
@@ -83,6 +84,6 @@ public class City implements Serializable {
     }
 
     public void setMatrix(int size) {
-        matrix=new Object[size][size];
+        matrix = new Object[size][size];
     }
 }

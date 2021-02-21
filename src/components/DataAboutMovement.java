@@ -8,12 +8,7 @@ public class DataAboutMovement {
     private String name;
     private Long id;
     private PositionOfResident positionOfResident;
-//    public  DataAboutMovement(Direction direction,String name,Long id,PositionOfResident positionOfResident){
-//        this.direction=direction;
-//        this.name=name;
-//        this.id=id;
-//        this.positionOfResident=positionOfResident;
-//    }
+
     public Direction getDirection() {
         return direction;
     }

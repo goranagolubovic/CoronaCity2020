@@ -1,0 +1,41 @@
+Posaljite ambulantu na poziciju (12,16).
+Posaljite ambulantu na poziciju (4,3).
+Posaljite ambulantu na poziciju (23,9).
+Ambulantno vozilo poslano i stanovnik 3 je dodan u kliniku 2
+Ambulantno vozilo poslano i stanovnik 18 je dodan u kliniku 1
+Ambulantno vozilo poslano i stanovnik 7 je dodan u kliniku 0
+Posaljite ambulantu na poziciju (12,16).
+Posaljite ambulantu na poziciju (11,16).
+Posaljite ambulantu na poziciju (2,9).
+Posaljite ambulantu na poziciju (13,16).
+Posaljite ambulantu na poziciju (13,18).
+Posaljite ambulantu na poziciju (5,3).
+Posaljite ambulantu na poziciju (11,17).
+Posaljite ambulantu na poziciju (19,18).
+Posaljite ambulantu na poziciju (11,14).
+Ambulantno vozilo poslano i stanovnik 19 je dodan u kliniku 3
+Ambulantno vozilo poslano i stanovnik 25 je dodan u kliniku 3
+Ambulantno vozilo poslano i stanovnik 1 je dodan u kliniku 2
+Ambulantno vozilo poslano i stanovnik 22 je dodan u kliniku 2
+Ambulantno vozilo poslano i stanovnik 3 je dodan u kliniku 1
+Ambulantno vozilo poslano i stanovnik 18 je dodan u kliniku 0
+Ambulantno vozilo poslano i stanovnik 24 je dodan u kliniku 2
+Ambulantno vozilo poslano i stanovnik 28 je dodan u kliniku 0
+Ambulantno vozilo poslano i stanovnik 29 je dodan u kliniku 2
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Posaljite ambulantu na poziciju (7,3).
+Posaljite ambulantu na poziciju (22,24).
+Ambulantno vozilo poslano i stanovnik 13 je dodan u kliniku 0
+Ambulantno vozilo poslano i stanovnik 10 je dodan u kliniku 1
+Trenutno nema slobodnog vozila.Pokusajte ponovo kasnije...
+Posaljite ambulantu na poziciju (13,7).
+Posaljite ambulantu na poziciju (12,21).
