@@ -153,9 +153,9 @@ public class PageController implements Initializable {
             for (int j = 0; j < city.getMatrix().length; j++) {
                 if ((i == 0 && j == 0) || (i == 0 && j == (city.getMatrix().length - 1)) || (j == 0 && i == (city.getMatrix().length - 1)) || (i == (city.getMatrix().length - 1) && j == (city.getMatrix().length - 1))) {
                     Rectangle rectangle = new Rectangle(cellHeight, cellWidth);
-                    //int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
+                    int clinicCapacity = (int) (10.0 / 100 * (numberOfResidents) + (random.nextDouble() * (5.0 / 100 * numberOfResidents)));
                     int id = random.nextInt(100);
-                    int clinicCapacity=4;
+                    //int clinicCapacity=4;
                     System.out.println("Kapacitet novokreirane klinike je " + clinicCapacity);
                     Clinic clinic = new Clinic(id, clinicCapacity, i, j);
                     //rectangle.getStyleClass().add("rectangle-map");
@@ -491,7 +491,7 @@ public class PageController implements Initializable {
         thread1.start();
     }
 
-  /*  @FXML
+   @FXML
     private void sendAmbulance(MouseEvent e) {
         Thread thread = new Thread(() -> {
             Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
@@ -504,12 +504,13 @@ public class PageController implements Initializable {
 //                interruptedException.printStackTrace();
 //            }
 
-            Platform.runLater(() -> {
-                Alert a = new Alert(Alert.AlertType.INFORMATION);
-                a.setContentText("Poslano je ambulanto vozilo. 😊");
-                a.show();
-            });
+//            Platform.runLater(() -> {
+//                Alert a = new Alert(Alert.AlertType.INFORMATION);
+//                a.setContentText("Poslano je ambulanto vozilo. 😊");
+//                a.show();
+//            });
             boolean isAdded = false;
+            boolean areClinicsFull=false;
             for (int a = 0, size = CityDataStore.getInstance().getAmbulances().size(); a < size && !isAdded; a++) {
                 if (CityDataStore.getInstance().getAmbulances().get(a).getAmbulanceFree()) {
                     List<Clinic> clinics = CityDataStore.getInstance().getClinics();
@@ -562,15 +563,45 @@ public class PageController implements Initializable {
                                 CityDataStore.getInstance().getAmbulances().get(a).setAmbulanceFree(true);
                             } else {
                                 if (i == clinicsSize - 1) {
+                                    areClinicsFull=true;
                                     System.out.println("Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
-                                    // TODO: Napraviti čekanje nove klinike
+                                    File file = new File("userNotifications.txt");
+                                    try {
+                                        if (!file.exists()) {
+                                            file.createNewFile();
+                                        }
+
+                                        FileWriter fileWriter = new FileWriter(file, true);
+
+                                        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+                                        bufferedWriter.write(" Kapaciteti klinika su popunjeni.Kreirajte novu kliniku.");
+                                        bufferedWriter.write("\r\n");
+                                        bufferedWriter.close();
+
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
+                                    }
+                                    try {
+                                        BufferedReader br = new BufferedReader(new FileReader("userNotifications.txt"));
+                                        String content = br.readLine();
+                                        String s = "";
+                                        while (content != null) {
+                                            s += content + "\r\n";
+                                            content = br.readLine();
+                                        }
+                                        Text text = new Text();
+                                        text.setText(s);
+                                        Platform.runLater(() -> notificationScrollPane.setContent(text));
+                                    } catch (IOException exception) {
+                                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            if (!isAdded) {
+            if (!isAdded && !areClinicsFull) {
                 File file = new File("userNotifications.txt");
                 try {
                     if (!file.exists()) {
@@ -613,8 +644,8 @@ public class PageController implements Initializable {
             }
         });
         thread.start();
-    }*/
-  @FXML
+    }
+ /* @FXML
   private void sendAmbulance(MouseEvent e) {
       Thread thread = new Thread(() -> {
           Logger.getLogger(PageController.class.getName()).addHandler(MainPageController.handler);
@@ -626,11 +657,13 @@ public class PageController implements Initializable {
 //            } catch (InterruptedException interruptedException) {
 //                interruptedException.printStackTrace();
 //            }
-            /*Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 Alert a = new Alert(Alert.AlertType.INFORMATION);
                 a.setContentText("Poslano je ambulanto vozilo. 😊");
                 a.show();
-            });*/  boolean isAdded = false;
+
+            });
+          boolean isAdded = false;
           List<Clinic> clinics = CityDataStore.getInstance().getClinics();
           for (int i = 0, clinicsSize = clinics.size(); i < clinicsSize && !isAdded; i++) {
               Clinic clinic = clinics.get(i);
@@ -657,7 +690,7 @@ public class PageController implements Initializable {
           }
       });
       thread.start();
-  }
+  }*/
 
     @FXML
     void stopSimulation(MouseEvent e) {
@@ -840,12 +873,62 @@ public class PageController implements Initializable {
                     alert.showAndWait();
                 });
             }
+            File file1 = new File("dataAboutMovement.txt");
+            file1.delete();
+            File file2 = new File("userNotifications.txt");
+            file2.delete();
+            File file3=new File("clinic-info.txt");
+                        try {
+                file1.createNewFile();
+                file2.createNewFile();
+            } catch (IOException exception) {
+               Logger.getLogger(PageController.class.getName()).log(Level.WARNING,exception.fillInStackTrace().toString());
+            }
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("userNotifications.txt"));
+                String content = br.readLine();
+                String s = "";
+                while (content != null) {
+                    s += content + "\r\n";
+                    content = br.readLine();
+                }
+                Text text = new Text();
+                text.setText(s);
+                Platform.runLater(() -> notificationScrollPane.setContent(text));
+            } catch (IOException exception) {
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
+            }
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("dataAboutMovement.txt"));
+                String content = br.readLine();
+                String s = "";
+                while (content != null) {
+                    s += content + "\r\n";
+                    content = br.readLine();
+                }
+                Text text = new Text();
+                text.setText(s);
+                Platform.runLater(() -> scrollPane.setContent(text));
+            } catch (IOException exception) {
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
+            }
             ComponentsCityDataStore.getInstance().setResidents(CityDataStore
                     .getInstance()
                     .getResidents()
                     .stream()
                     .map(Resident::mapToComponent)
                     .collect(Collectors.toList()));
+            try {
+                Clinic.numberOfInfected.set(CityDataStore.getInstance().getInfectedResidents().size());
+                Clinic.numberOfRecovered.set(CityDataStore.getInstance().getRecoveredResidents().size());
+                PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
+                patients.println(CityDataStore.getInstance().getInfectedResidents().size());
+                patients.println(CityDataStore.getInstance().getRecoveredResidents().size());
+                patients.close();
+            } catch (IOException exception) {
+                Logger.getLogger(PageController.class.getName()).log(Level.WARNING, exception.fillInStackTrace().toString());
+            }
+            //detectChangeOfFile();
             double gridWidth = 500;
             double gridHeight = 500;
 

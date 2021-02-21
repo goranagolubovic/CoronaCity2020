@@ -46,9 +46,10 @@ public abstract class ResidentComponent implements Runnable {
     public static Stack<Alarm> stackOfAlarms = new Stack<Alarm>();
     protected boolean backToHome = false;
     protected final Object lockerInfected = new Object();
-    private final Object lockerAddingToClinics=new Object();
-    private DataAboutMovement dataAboutMovement=new DataAboutMovement();
+    private final Object lockerAddingToClinics = new Object();
+    private DataAboutMovement dataAboutMovement = new DataAboutMovement();
     Context context;
+
     public ResidentComponent(Resident resident) {
         this.resident = resident;
     }
@@ -65,7 +66,7 @@ public abstract class ResidentComponent implements Runnable {
                     //Thread.sleep((long) (50 + new Random().nextDouble() * 300));
                 } catch (InterruptedException e1) {
                     // TODO Auto-generated catch block
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e1.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e1.fillInStackTrace().toString());
                 }
             }
             List<Resident> recoveredResidents;
@@ -81,45 +82,49 @@ public abstract class ResidentComponent implements Runnable {
             }*/
             //Ako je zarazen
             if (checkDistanceOfResidentAndControlStation() && isResidentGetOutOfTheHouse(resident) && resident.getBodyTemperature() > 37.0) { //&& PageController.isThreadRunning
+                resident.setInfected(true);
 
-                stackOfAlarms.push(new Alarm(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate(), resident.getHouseID(),resident));
+                stackOfAlarms.push(new Alarm(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate(), resident.getHouseID(), resident));
                 synchronized (PageController.lockerInfectedPerson) {
                     try {
                         Rectangle rectangle = (Rectangle) city.getFieldOfMatrix(resident.getCurrentPositionOfResident().getFirstCoordinate(), resident.getCurrentPositionOfResident().getSecondCoordinate());
                         PageController.lockerInfectedPerson.wait();
                         if (!(rectangle.getUserData() instanceof ControlStation || rectangle.getUserData() instanceof Clinic
-                        || rectangle.getUserData() instanceof House)) {
+                                || rectangle.getUserData() instanceof House)) {
                             rectangle.setUserData(null);
                             Platform.runLater(() -> {
                                 rectangle.setFill(Color.rgb(238, 229, 222));
                             });
-                        } else if(rectangle.getUserData() instanceof ControlStation) {
+                        } else if (rectangle.getUserData() instanceof ControlStation) {
                             Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/thermometer.png")));
                             });
                             rectangle.setUserData(previousControlStation);
-                        }
-                        else if(rectangle.getUserData() instanceof House){
+                        } else if (rectangle.getUserData() instanceof House) {
                             Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/home.png")));
                             });
                             rectangle.setUserData(previousHouse);
-                        }
-                        else{
+                        } else {
                             Platform.runLater(() -> {
                                 rectangle.setFill(new ImagePattern(new Image("view/images/clinic.png")));
                             });
                             rectangle.setUserData(previousClinic);
                         }
-                        synchronized (lockerInfected) {
-                            lockerInfected.wait();
-                        }
 
-                        backToHome = false;
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,ex.fillInStackTrace().toString());
+                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
+                    }
+
+                }
+                while(resident.isInfected()){
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
+                backToHome = false;
             }
             // Ako nije zaražen..
             else {
@@ -133,17 +138,16 @@ public abstract class ResidentComponent implements Runnable {
                 if (backToHome && resident.getCurrentPositionOfResident().getFirstCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getFirstCoordinateOfHouse()
                         && resident.getCurrentPositionOfResident().getSecondCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getSecondCoordinateOfHouse()) {
                     List<ResidentComponent> listOfInfectedHouseMates = findInfectedHouseMates(resident);
-                    try {
-                        for (ResidentComponent infectedHouseMate : listOfInfectedHouseMates) {
-                            synchronized (infectedHouseMate.lockerInfected) {
-                                infectedHouseMate.lockerInfected.wait();
-                            }
+                    while(listOfInfectedHouseMates.stream().anyMatch(res -> res.resident.isInfected())){
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
                         }
-                        System.out.println("Nastavljeno kretanje od kuce...");
-                        backToHome = false;
-                    } catch (InterruptedException e) {
-                        Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                        System.out.println("Vrti se");
                     }
+                    System.out.println("Nastavljeno kretanje od kuce...");
+                    backToHome = false;
                 }
             }
 //
@@ -198,9 +202,9 @@ public abstract class ResidentComponent implements Runnable {
             }
         }
         synchronized (locker) {
-                if (!checkDistance(firstCoordinate, secondCoordinate,resident)) {
-                    return true;
-                }
+            if (!checkDistance(firstCoordinate, secondCoordinate, resident)) {
+                return true;
+            }
         }
         nextField = city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
         nextRectangle = (Rectangle) nextField;
@@ -237,9 +241,9 @@ public abstract class ResidentComponent implements Runnable {
 //                        return false;
 //                    }
 //                }
-               previousHouse=null;
-                previousClinic=null;
-                previousControlStation=null;
+                previousHouse = null;
+                previousClinic = null;
+                previousControlStation = null;
             }
         }
         if (nextFieldContent instanceof ControlStation) {
@@ -260,20 +264,18 @@ public abstract class ResidentComponent implements Runnable {
         if (backToHome && resident.getCurrentPositionOfResident().getFirstCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getFirstCoordinateOfHouse()
                 && resident.getCurrentPositionOfResident().getSecondCoordinate() == resident.getHouseWithConcretID(resident.getHouseID()).getSecondCoordinateOfHouse()) {
             List<ResidentComponent> listOfInfectedHouseMates = findInfectedHouseMates(resident);
-            try {
-                for (ResidentComponent infectedHouseMate : listOfInfectedHouseMates) {
-                    synchronized (infectedHouseMate.lockerInfected) {
-                        infectedHouseMate.lockerInfected.wait();
-                    }
+            while (listOfInfectedHouseMates.stream().anyMatch(housemate -> housemate.resident.isInfected())) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
-                System.out.println("Nastavljeno kretanje od kuce...");
-                backToHome = false;
-                return true;
-                //simulationStopped.isSimulationStopped=false;
-            } catch (InterruptedException e) {
-                Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                System.out.println("Vrti se");
             }
-            return false;
+            System.out.println("Nastavljeno kretanje od kuce...");
+            backToHome = false;
+            return true;
+            //simulationStopped.isSimulationStopped=false;
         }
 
         Rectangle newRectangle = (Rectangle) city.getFieldOfMatrix(firstCoordinate, secondCoordinate);
@@ -291,36 +293,36 @@ public abstract class ResidentComponent implements Runnable {
                 newRectangle.setUserData(resident);
             }
         }
-        File file=new File("dataAboutMovement.txt");
-        try{
-            if(!file.exists()){
+        File file = new File("dataAboutMovement.txt");
+        try {
+            if (!file.exists()) {
                 file.createNewFile();
             }
 
-            FileWriter fileWriter=new FileWriter(file,true);
+            FileWriter fileWriter = new FileWriter(file, true);
 
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(resident.getName()+resident.getId()+","+direction+",("+resident.getCurrentPositionOfResident().getSecondCoordinate()
-                    +","+resident.getCurrentPositionOfResident().getFirstCoordinate()+")");
+            bufferedWriter.write(resident.getName() + resident.getId() + "," + direction + ",(" + resident.getCurrentPositionOfResident().getSecondCoordinate()
+                    + "," + resident.getCurrentPositionOfResident().getFirstCoordinate() + ")");
             bufferedWriter.write("\r\n");
             bufferedWriter.close();
 
-        } catch(IOException e) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+        } catch (IOException e) {
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
         }
         try {
-            BufferedReader br=new BufferedReader(new FileReader("dataAboutMovement.txt"));
-            String content=br.readLine();
-            String s="";
-            while(content!=null) {
-                s+= content+"\r\n";
-                content=br.readLine();
+            BufferedReader br = new BufferedReader(new FileReader("dataAboutMovement.txt"));
+            String content = br.readLine();
+            String s = "";
+            while (content != null) {
+                s += content + "\r\n";
+                content = br.readLine();
             }
-            Text text=new Text();
+            Text text = new Text();
             text.setText(s);
-            Platform.runLater(()->ComponentsCityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
+            Platform.runLater(() -> ComponentsCityDataStore.getInstance().getPageController().getScrollPane().setContent(text));
         } catch (IOException e) {
-            Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+            Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
         }
         dataAboutMovement.setDirection(direction);
         dataAboutMovement.setPositionOfResident(resident.getCurrentPositionOfResident());
@@ -363,7 +365,8 @@ public abstract class ResidentComponent implements Runnable {
             return Direction.Bottom;
 
     }
-    public  synchronized DataAboutMovement getDataAboutMovement() {
+
+    public synchronized DataAboutMovement getDataAboutMovement() {
         return dataAboutMovement;
     }
 
@@ -431,7 +434,7 @@ public abstract class ResidentComponent implements Runnable {
 
     public abstract Image getImageOfResidentWithHouse();
 
-    public abstract boolean checkDistance(int firstCoordinate, int secondCoordinate,Resident resident);
+    public abstract boolean checkDistance(int firstCoordinate, int secondCoordinate, Resident resident);
 
     // Setters and getters
     public void setDataAboutCoronaCity(DataAboutCoronaCity dataAboutCoronaCity) {

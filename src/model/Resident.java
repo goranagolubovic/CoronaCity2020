@@ -56,9 +56,6 @@ public abstract class Resident implements Serializable {
                 DecimalFormat df = new DecimalFormat("0.0");
                 bodyTemperature = Double.parseDouble(df.format(minTemperature + (temperature.nextDouble() * (maxTemperature - minTemperature))));
                 threeLastBodyTemperatures.add(bodyTemperature);
-                int size = threeLastBodyTemperatures.size();
-                double average = threeLastBodyTemperatures.stream().reduce(0.0, (a, b) -> a + b) / size;
-                isInfected = average > 37.0;
             }
         }, 0, 10_000);
         positionOfResident = new PositionOfResident(0, 0);

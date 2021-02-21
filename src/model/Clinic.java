@@ -20,20 +20,21 @@ public class Clinic implements Serializable {
     private int secondCoordinate;
 
     public static AtomicInteger numberOfInfected = new AtomicInteger(0);
-    public static AtomicInteger numberOfRecovered=new AtomicInteger(0);
+    public static AtomicInteger numberOfRecovered = new AtomicInteger(0);
 
 
     private List<Resident> infectedResidents = new ArrayList<>();
     protected PageController.SimulationStopped simulationStopped;
     private int clinicID;
 
-    public Clinic(int clinicID,int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
+    public Clinic(int clinicID, int capacityOfClinic, int firstCoordinate, int secondCoordinate) {
         this.capacityOfClinic = capacityOfClinic;
         this.firstCoordinate = firstCoordinate;
         this.secondCoordinate = secondCoordinate;
-        this.clinicID=clinicID;
+        this.clinicID = clinicID;
     }
-    private  static final Object numberOfInfectedInClinics=new Object();
+
+    private static final Object numberOfInfectedInClinics = new Object();
 
     public List<Resident> getInfectedResidents() {
         return infectedResidents;
@@ -50,7 +51,7 @@ public class Clinic implements Serializable {
             infectedResidents.add(resident);
             CityDataStore.getInstance().addInfectedResident(resident);
             capacityOfClinic--;
-           synchronized (numberOfInfectedInClinics) {
+            synchronized (numberOfInfectedInClinics) {
                 numberOfInfected.getAndIncrement();
                 try {
                     PrintWriter patients = new PrintWriter(new BufferedWriter(new FileWriter("clinic-info.txt")));
@@ -58,7 +59,7 @@ public class Clinic implements Serializable {
                     patients.close();
                     return true;
                 } catch (IOException e) {
-                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+                    Logger.getLogger(PageController.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
                 }
             }
         }
@@ -68,10 +69,15 @@ public class Clinic implements Serializable {
     public synchronized List<Resident> removeRecoveredResident() {
         Logger.getLogger(Clinic.class.getName()).addHandler(MainPageController.handler);
         List<Resident> recoveredResidents = new ArrayList<>();
-        for (int i = 0 ; i < infectedResidents.size(); i++) {
+        for (int i = 0; i < infectedResidents.size(); i++) {
             try {
                 Resident res = infectedResidents.
                         get(i);
+
+                int size = res.getThreeLastBodyTemperatures().size();
+                double average =  res.getThreeLastBodyTemperatures().stream().reduce(0.0, (a, b) -> a + b) / size;
+                res.setInfected(average > 37.0);
+
                 if (!res.isInfected()) {
                     recoveredResidents.add(res);
                     CityDataStore.getInstance().addRecoveredResident(res);
@@ -96,23 +102,15 @@ public class Clinic implements Serializable {
                             .filter(r -> res.getId() == r.getResident().getId())
                             .findFirst();
                     if (opt.isPresent()) {
-                        synchronized (opt.get().getLockerInfected()) {
-                            try {
-                                Thread.sleep(3000);
-                                System.out.println("Stanovnik " + res.getId() + "se oporavio.");
-                                //zarazeni se vraca kuci nakon oporavka
-                                res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
-                                        res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
-                            } catch (InterruptedException e) {
-                                Logger.getLogger(Clinic.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
-                            }
-                            opt.get().getLockerInfected().notifyAll();
-                        }
+                        System.out.println("Stanovnik " + res.getId() + "se oporavio.");
+                        //zarazeni se vraca kuci nakon oporavka
+                        res.setCurrentPositionOfResident(res.getHouseWithConcretID(res.getHouseID()).getFirstCoordinateOfHouse(),
+                                res.getHouseWithConcretID(res.getHouseID()).getSecondCoordinateOfHouse());
+                        res.setInfected(false);
                     }
                 }
-            }
-            catch (IndexOutOfBoundsException e){
-                Logger.getLogger(Clinic.class.getName()).log(Level.WARNING,e.fillInStackTrace().toString());
+            } catch (IndexOutOfBoundsException e) {
+                Logger.getLogger(Clinic.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
             }
         }
         return recoveredResidents;
